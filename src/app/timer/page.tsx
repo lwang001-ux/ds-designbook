@@ -2,19 +2,142 @@
 
 import { useState, useEffect, useCallback } from 'react';
 
-// Standalone Critique Timer - safe to share on screen
+// Flip Clock Digit Component
+const FlipDigit = ({ digit, prevDigit, isFlipping }: { digit: string; prevDigit: string; isFlipping: boolean }) => {
+  return (
+    <div style={{
+      position: 'relative',
+      width: 100,
+      height: 140,
+      perspective: '200px',
+    }}>
+      {/* Card container */}
+      <div style={{
+        position: 'relative',
+        width: '100%',
+        height: '100%',
+        background: '#1a1a1a',
+        borderRadius: 8,
+        boxShadow: '0 4px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)',
+        overflow: 'hidden',
+      }}>
+        {/* Top half - static showing current digit */}
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: '50%',
+          background: 'linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 100%)',
+          overflow: 'hidden',
+          borderBottom: '2px solid #0a0a0a',
+          display: 'flex',
+          alignItems: 'flex-end',
+          justifyContent: 'center',
+        }}>
+          <span style={{
+            fontSize: 120,
+            fontFamily: "'Courier New', monospace",
+            fontWeight: 700,
+            color: '#f0f0e8',
+            lineHeight: 1,
+            transform: 'translateY(50%)',
+            textShadow: '0 2px 4px rgba(0,0,0,0.3)',
+          }}>
+            {digit}
+          </span>
+        </div>
+
+        {/* Bottom half - static showing current digit */}
+        <div style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: '50%',
+          background: 'linear-gradient(180deg, #1a1a1a 0%, #151515 100%)',
+          overflow: 'hidden',
+          display: 'flex',
+          alignItems: 'flex-start',
+          justifyContent: 'center',
+        }}>
+          <span style={{
+            fontSize: 120,
+            fontFamily: "'Courier New', monospace",
+            fontWeight: 700,
+            color: '#e8e8e0',
+            lineHeight: 1,
+            transform: 'translateY(-50%)',
+            textShadow: '0 -1px 2px rgba(0,0,0,0.5)',
+          }}>
+            {digit}
+          </span>
+        </div>
+
+        {/* Center line highlight */}
+        <div style={{
+          position: 'absolute',
+          top: '50%',
+          left: 0,
+          right: 0,
+          height: 2,
+          background: '#0a0a0a',
+          transform: 'translateY(-50%)',
+          boxShadow: '0 1px 0 rgba(255,255,255,0.05)',
+        }} />
+
+        {/* Side notches */}
+        <div style={{
+          position: 'absolute',
+          top: '50%',
+          left: -4,
+          width: 8,
+          height: 12,
+          background: '#0a0a0a',
+          borderRadius: '0 6px 6px 0',
+          transform: 'translateY(-50%)',
+        }} />
+        <div style={{
+          position: 'absolute',
+          top: '50%',
+          right: -4,
+          width: 8,
+          height: 12,
+          background: '#0a0a0a',
+          borderRadius: '6px 0 0 6px',
+          transform: 'translateY(-50%)',
+        }} />
+      </div>
+
+      {/* Inner shadow overlay for depth */}
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        borderRadius: 8,
+        boxShadow: 'inset 0 0 20px rgba(0,0,0,0.3)',
+        pointerEvents: 'none',
+      }} />
+    </div>
+  );
+};
+
+// Standalone Critique Timer - 1970's Flip Clock Style
 export default function CritiqueTimerPage() {
   const [minutes, setMinutes] = useState(3);
   const [seconds, setSeconds] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const [phase, setPhase] = useState<'warm' | 'cool' | 'open'>('open');
-  const [totalTime, setTotalTime] = useState(180); // in seconds
+  const [totalTime, setTotalTime] = useState(180);
   const [currentStudent, setCurrentStudent] = useState(1);
   const [totalStudents, setTotalStudents] = useState(1);
   const [showSettings, setShowSettings] = useState(true);
   const [alertPlayed, setAlertPlayed] = useState(false);
+  const [prevMinutes, setPrevMinutes] = useState(3);
+  const [prevSeconds, setPrevSeconds] = useState(0);
 
-  // Preset times
   const presets = [
     { label: '1 min', seconds: 60 },
     { label: '2 min', seconds: 120 },
@@ -23,19 +146,14 @@ export default function CritiqueTimerPage() {
     { label: '10 min', seconds: 600 },
   ];
 
-  // Phase colors
   const phaseColors = {
-    warm: { bg: '#FFF9E6', border: '#FFE500', text: '#B8860B', label: 'WARM FEEDBACK' },
-    cool: { bg: '#F0FDFF', border: '#00D4FF', text: '#0099B8', label: 'COOL FEEDBACK' },
-    open: { bg: '#FFFFFF', border: '#1a1f3c', text: '#1a1f3c', label: 'OPEN CRITIQUE' },
+    warm: { accent: '#FFE500', label: 'WARM FEEDBACK', icon: '☀️' },
+    cool: { accent: '#00D4FF', label: 'COOL FEEDBACK', icon: '❄️' },
+    open: { accent: '#EC008C', label: 'OPEN CRITIQUE', icon: '💬' },
   };
 
-  const currentPhaseStyle = phaseColors[phase];
+  const currentPhase = phaseColors[phase];
 
-  // Calculate progress percentage
-  const progress = totalTime > 0 ? ((totalTime - (minutes * 60 + seconds)) / totalTime) * 100 : 0;
-
-  // Play alert sound (using Web Audio API)
   const playAlert = useCallback(() => {
     if (alertPlayed) return;
     setAlertPlayed(true);
@@ -62,12 +180,14 @@ export default function CritiqueTimerPage() {
     }
   }, [alertPlayed]);
 
-  // Timer logic
   useEffect(() => {
     let interval: NodeJS.Timeout;
 
     if (isRunning) {
       interval = setInterval(() => {
+        setPrevMinutes(minutes);
+        setPrevSeconds(seconds);
+
         if (seconds === 0) {
           if (minutes === 0) {
             setIsRunning(false);
@@ -85,7 +205,6 @@ export default function CritiqueTimerPage() {
     return () => clearInterval(interval);
   }, [isRunning, minutes, seconds, playAlert]);
 
-  // Alert when 30 seconds left
   useEffect(() => {
     if (isRunning && minutes === 0 && seconds === 30 && !alertPlayed) {
       playAlert();
@@ -106,6 +225,8 @@ export default function CritiqueTimerPage() {
     setIsRunning(false);
     setMinutes(Math.floor(totalTime / 60));
     setSeconds(totalTime % 60);
+    setPrevMinutes(Math.floor(totalTime / 60));
+    setPrevSeconds(totalTime % 60);
     setAlertPlayed(false);
   };
 
@@ -113,6 +234,8 @@ export default function CritiqueTimerPage() {
     setTotalTime(secs);
     setMinutes(Math.floor(secs / 60));
     setSeconds(secs % 60);
+    setPrevMinutes(Math.floor(secs / 60));
+    setPrevSeconds(secs % 60);
     setAlertPlayed(false);
   };
 
@@ -130,39 +253,60 @@ export default function CritiqueTimerPage() {
     }
   };
 
-  // Format time display
-  const formatTime = (m: number, s: number) => {
-    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-  };
+  // Get individual digits
+  const minTens = Math.floor(minutes / 10).toString();
+  const minOnes = (minutes % 10).toString();
+  const secTens = Math.floor(seconds / 10).toString();
+  const secOnes = (seconds % 10).toString();
+
+  const prevMinTens = Math.floor(prevMinutes / 10).toString();
+  const prevMinOnes = (prevMinutes % 10).toString();
+  const prevSecTens = Math.floor(prevSeconds / 10).toString();
+  const prevSecOnes = (prevSeconds % 10).toString();
+
+  const isUrgent = minutes === 0 && seconds <= 30;
+  const isComplete = minutes === 0 && seconds === 0;
 
   return (
     <div style={{
       minHeight: '100vh',
-      background: currentPhaseStyle.bg,
+      background: 'linear-gradient(180deg, #2d2d2d 0%, #1a1a1a 50%, #0d0d0d 100%)',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
       fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
       padding: 20,
-      transition: 'background 0.3s ease',
     }}>
-      {/* Phase indicator */}
+      {/* Phase indicator - LED style */}
       <div style={{
         position: 'absolute',
-        top: 20,
+        top: 24,
         left: '50%',
         transform: 'translateX(-50%)',
-        padding: '8px 24px',
-        background: '#FFFFFF',
-        border: `2px solid ${currentPhaseStyle.border}`,
-        borderRadius: 20,
-        fontSize: 14,
-        fontWeight: 700,
-        color: currentPhaseStyle.text,
-        letterSpacing: 2,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+        padding: '10px 24px',
+        background: 'rgba(0,0,0,0.5)',
+        borderRadius: 30,
+        border: '1px solid #333',
       }}>
-        {currentPhaseStyle.label}
+        <div style={{
+          width: 12,
+          height: 12,
+          borderRadius: '50%',
+          background: currentPhase.accent,
+          boxShadow: `0 0 10px ${currentPhase.accent}, 0 0 20px ${currentPhase.accent}`,
+        }} />
+        <span style={{
+          fontSize: 13,
+          fontWeight: 600,
+          color: '#e0e0e0',
+          letterSpacing: 2,
+        }}>
+          {currentPhase.label}
+        </span>
       </div>
 
       {/* Settings toggle */}
@@ -170,30 +314,31 @@ export default function CritiqueTimerPage() {
         onClick={() => setShowSettings(!showSettings)}
         style={{
           position: 'absolute',
-          top: 20,
-          right: 20,
-          width: 40,
-          height: 40,
+          top: 24,
+          right: 24,
+          width: 44,
+          height: 44,
           borderRadius: '50%',
-          background: '#FFFFFF',
-          border: '1px solid #E8E8E8',
+          background: '#2a2a2a',
+          border: '1px solid #444',
           cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
         }}
       >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="1.5">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="1.5">
           <circle cx="12" cy="12" r="3"/>
           <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
         </svg>
       </button>
 
-      {/* Student counter (if multiple students) */}
+      {/* Student counter */}
       {totalStudents > 1 && (
         <div style={{
           position: 'absolute',
-          top: 80,
+          top: 90,
           left: '50%',
           transform: 'translateX(-50%)',
           display: 'flex',
@@ -207,8 +352,8 @@ export default function CritiqueTimerPage() {
               width: 36,
               height: 36,
               borderRadius: '50%',
-              background: '#FFFFFF',
-              border: '1px solid #E8E8E8',
+              background: '#2a2a2a',
+              border: '1px solid #444',
               cursor: currentStudent === 1 ? 'not-allowed' : 'pointer',
               opacity: currentStudent === 1 ? 0.5 : 1,
               display: 'flex',
@@ -216,11 +361,11 @@ export default function CritiqueTimerPage() {
               justifyContent: 'center',
             }}
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2">
               <polyline points="15 18 9 12 15 6"/>
             </svg>
           </button>
-          <span style={{ fontSize: 18, fontWeight: 600, color: '#1a1f3c' }}>
+          <span style={{ fontSize: 16, fontWeight: 600, color: '#e0e0e0' }}>
             Student {currentStudent} of {totalStudents}
           </span>
           <button
@@ -230,8 +375,8 @@ export default function CritiqueTimerPage() {
               width: 36,
               height: 36,
               borderRadius: '50%',
-              background: '#FFFFFF',
-              border: '1px solid #E8E8E8',
+              background: '#2a2a2a',
+              border: '1px solid #444',
               cursor: currentStudent === totalStudents ? 'not-allowed' : 'pointer',
               opacity: currentStudent === totalStudents ? 0.5 : 1,
               display: 'flex',
@@ -239,106 +384,136 @@ export default function CritiqueTimerPage() {
               justifyContent: 'center',
             }}
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2">
               <polyline points="9 18 15 12 9 6"/>
             </svg>
           </button>
         </div>
       )}
 
-      {/* Main timer display */}
+      {/* Main flip clock display */}
       <div style={{
-        position: 'relative',
-        width: 320,
-        height: 320,
+        background: 'linear-gradient(180deg, #3a3a3a 0%, #1a1a1a 10%, #0a0a0a 100%)',
+        padding: '30px 40px',
+        borderRadius: 20,
+        boxShadow: '0 20px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1)',
+        border: '1px solid #333',
         marginBottom: 40,
       }}>
-        {/* Progress ring */}
-        <svg style={{ position: 'absolute', top: 0, left: 0, transform: 'rotate(-90deg)' }} width="320" height="320">
-          <circle
-            cx="160"
-            cy="160"
-            r="150"
-            fill="none"
-            stroke="#E8E8E8"
-            strokeWidth="8"
-          />
-          <circle
-            cx="160"
-            cy="160"
-            r="150"
-            fill="none"
-            stroke={currentPhaseStyle.border}
-            strokeWidth="8"
-            strokeLinecap="round"
-            strokeDasharray={`${2 * Math.PI * 150}`}
-            strokeDashoffset={`${2 * Math.PI * 150 * (1 - progress / 100)}`}
-            style={{ transition: 'stroke-dashoffset 0.5s ease' }}
-          />
-        </svg>
-
-        {/* Time display */}
+        {/* Wood grain base accent */}
         <div style={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          textAlign: 'center',
+          position: 'relative',
         }}>
-          <div style={{
-            fontSize: 80,
-            fontWeight: 300,
-            color: minutes === 0 && seconds <= 30 ? '#E74C3C' : currentPhaseStyle.text,
-            fontFamily: 'monospace',
-            letterSpacing: -2,
-            transition: 'color 0.3s ease',
-          }}>
-            {formatTime(minutes, seconds)}
-          </div>
-          {minutes === 0 && seconds <= 30 && seconds > 0 && (
+          {/* Urgent glow effect */}
+          {isUrgent && !isComplete && (
             <div style={{
-              fontSize: 14,
-              color: '#E74C3C',
-              fontWeight: 600,
-              marginTop: 8,
-              animation: 'pulse 1s infinite',
+              position: 'absolute',
+              top: -20,
+              left: -20,
+              right: -20,
+              bottom: -20,
+              background: 'radial-gradient(ellipse at center, rgba(231, 76, 60, 0.2) 0%, transparent 70%)',
+              animation: 'urgentPulse 1s ease-in-out infinite',
+              pointerEvents: 'none',
+            }} />
+          )}
+
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 16,
+          }}>
+            {/* Minutes */}
+            <FlipDigit digit={minTens} prevDigit={prevMinTens} isFlipping={minTens !== prevMinTens} />
+            <FlipDigit digit={minOnes} prevDigit={prevMinOnes} isFlipping={minOnes !== prevMinOnes} />
+
+            {/* Colon separator */}
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 24,
+              padding: '0 8px',
             }}>
-              WRAPPING UP
+              <div style={{
+                width: 16,
+                height: 16,
+                borderRadius: '50%',
+                background: isRunning ? currentPhase.accent : '#444',
+                boxShadow: isRunning ? `0 0 10px ${currentPhase.accent}` : 'none',
+                transition: 'all 0.3s ease',
+              }} />
+              <div style={{
+                width: 16,
+                height: 16,
+                borderRadius: '50%',
+                background: isRunning ? currentPhase.accent : '#444',
+                boxShadow: isRunning ? `0 0 10px ${currentPhase.accent}` : 'none',
+                transition: 'all 0.3s ease',
+              }} />
+            </div>
+
+            {/* Seconds */}
+            <FlipDigit digit={secTens} prevDigit={prevSecTens} isFlipping={secTens !== prevSecTens} />
+            <FlipDigit digit={secOnes} prevDigit={prevSecOnes} isFlipping={secOnes !== prevSecOnes} />
+          </div>
+
+          {/* Status messages */}
+          {isUrgent && !isComplete && (
+            <div style={{
+              position: 'absolute',
+              bottom: -40,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              fontSize: 14,
+              fontWeight: 700,
+              color: '#E74C3C',
+              letterSpacing: 3,
+              animation: 'blink 1s infinite',
+            }}>
+              ⚠ WRAPPING UP
             </div>
           )}
-          {minutes === 0 && seconds === 0 && (
+
+          {isComplete && (
             <div style={{
-              fontSize: 18,
-              color: '#E74C3C',
+              position: 'absolute',
+              bottom: -40,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              fontSize: 16,
               fontWeight: 700,
-              marginTop: 8,
+              color: currentPhase.accent,
+              letterSpacing: 3,
+              textShadow: `0 0 10px ${currentPhase.accent}`,
             }}>
-              TIME'S UP!
+              ✓ TIME'S UP!
             </div>
           )}
         </div>
       </div>
 
-      {/* Controls */}
+      {/* Controls - retro button style */}
       <div style={{ display: 'flex', gap: 16, marginBottom: 30 }}>
         {!isRunning ? (
           <button
             onClick={startTimer}
             style={{
               padding: '16px 48px',
-              background: currentPhaseStyle.border,
+              background: `linear-gradient(180deg, ${currentPhase.accent} 0%, ${currentPhase.accent}dd 100%)`,
               border: 'none',
-              borderRadius: 30,
-              color: '#FFFFFF',
-              fontSize: 18,
-              fontWeight: 600,
+              borderRadius: 8,
+              color: '#000',
+              fontSize: 16,
+              fontWeight: 700,
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               gap: 10,
+              boxShadow: `0 4px 15px ${currentPhase.accent}66`,
+              letterSpacing: 2,
             }}
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
               <polygon points="5 3 19 12 5 21 5 3"/>
             </svg>
             START
@@ -348,19 +523,20 @@ export default function CritiqueTimerPage() {
             onClick={pauseTimer}
             style={{
               padding: '16px 48px',
-              background: '#FFFFFF',
-              border: `2px solid ${currentPhaseStyle.border}`,
-              borderRadius: 30,
-              color: currentPhaseStyle.text,
-              fontSize: 18,
-              fontWeight: 600,
+              background: 'linear-gradient(180deg, #444 0%, #333 100%)',
+              border: `2px solid ${currentPhase.accent}`,
+              borderRadius: 8,
+              color: '#fff',
+              fontSize: 16,
+              fontWeight: 700,
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               gap: 10,
+              letterSpacing: 2,
             }}
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
               <rect x="6" y="4" width="4" height="16"/>
               <rect x="14" y="4" width="4" height="16"/>
             </svg>
@@ -371,39 +547,50 @@ export default function CritiqueTimerPage() {
           onClick={resetTimer}
           style={{
             padding: '16px 32px',
-            background: '#FFFFFF',
-            border: '1px solid #E8E8E8',
-            borderRadius: 30,
-            color: '#666',
-            fontSize: 18,
-            fontWeight: 500,
+            background: 'linear-gradient(180deg, #333 0%, #222 100%)',
+            border: '1px solid #444',
+            borderRadius: 8,
+            color: '#888',
+            fontSize: 16,
+            fontWeight: 600,
             cursor: 'pointer',
+            letterSpacing: 2,
           }}
         >
           RESET
         </button>
       </div>
 
-      {/* Phase selector */}
-      <div style={{ display: 'flex', gap: 12, marginBottom: 20 }}>
+      {/* Phase selector - toggle switch style */}
+      <div style={{
+        display: 'flex',
+        gap: 8,
+        padding: 6,
+        background: '#1a1a1a',
+        borderRadius: 30,
+        border: '1px solid #333',
+      }}>
         {(['warm', 'cool', 'open'] as const).map(p => (
           <button
             key={p}
             onClick={() => setPhase(p)}
             style={{
               padding: '10px 24px',
-              background: phase === p ? phaseColors[p].border : '#FFFFFF',
-              border: `2px solid ${phaseColors[p].border}`,
-              borderRadius: 20,
-              color: phase === p ? '#FFFFFF' : phaseColors[p].text,
+              background: phase === p
+                ? `linear-gradient(180deg, ${phaseColors[p].accent} 0%, ${phaseColors[p].accent}cc 100%)`
+                : 'transparent',
+              border: 'none',
+              borderRadius: 24,
+              color: phase === p ? '#000' : '#666',
               fontSize: 12,
-              fontWeight: 600,
+              fontWeight: 700,
               cursor: 'pointer',
               textTransform: 'uppercase',
               letterSpacing: 1,
+              transition: 'all 0.2s ease',
             }}
           >
-            {p === 'warm' ? '☀️ Warm' : p === 'cool' ? '❄️ Cool' : '💬 Open'}
+            {phaseColors[p].icon} {p}
           </button>
         ))}
       </div>
@@ -415,14 +602,14 @@ export default function CritiqueTimerPage() {
           bottom: 0,
           left: 0,
           right: 0,
-          background: '#FFFFFF',
-          borderTop: '1px solid #E8E8E8',
-          padding: '20px 40px',
-          boxShadow: '0 -4px 20px rgba(0,0,0,0.1)',
+          background: 'linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 100%)',
+          borderTop: '1px solid #444',
+          padding: '24px 40px',
+          boxShadow: '0 -10px 40px rgba(0,0,0,0.5)',
         }}>
           <div style={{ maxWidth: 600, margin: '0 auto' }}>
             <div style={{ marginBottom: 20 }}>
-              <label style={{ fontSize: 12, fontWeight: 600, color: '#666', display: 'block', marginBottom: 8 }}>
+              <label style={{ fontSize: 11, fontWeight: 600, color: '#666', display: 'block', marginBottom: 10, letterSpacing: 2 }}>
                 TIME PRESETS
               </label>
               <div style={{ display: 'flex', gap: 8 }}>
@@ -431,13 +618,15 @@ export default function CritiqueTimerPage() {
                     key={preset.seconds}
                     onClick={() => setPresetTime(preset.seconds)}
                     style={{
-                      padding: '8px 16px',
-                      background: totalTime === preset.seconds ? '#1a1f3c' : '#FFFFFF',
-                      border: '1px solid #E8E8E8',
-                      borderRadius: 8,
-                      color: totalTime === preset.seconds ? '#FFFFFF' : '#666',
-                      fontSize: 14,
-                      fontWeight: 500,
+                      padding: '10px 18px',
+                      background: totalTime === preset.seconds
+                        ? `linear-gradient(180deg, ${currentPhase.accent} 0%, ${currentPhase.accent}cc 100%)`
+                        : '#333',
+                      border: totalTime === preset.seconds ? 'none' : '1px solid #444',
+                      borderRadius: 6,
+                      color: totalTime === preset.seconds ? '#000' : '#888',
+                      fontSize: 13,
+                      fontWeight: 600,
                       cursor: 'pointer',
                     }}
                   >
@@ -448,43 +637,52 @@ export default function CritiqueTimerPage() {
             </div>
 
             <div>
-              <label style={{ fontSize: 12, fontWeight: 600, color: '#666', display: 'block', marginBottom: 8 }}>
-                NUMBER OF STUDENTS (for gallery walk)
+              <label style={{ fontSize: 11, fontWeight: 600, color: '#666', display: 'block', marginBottom: 10, letterSpacing: 2 }}>
+                STUDENTS (GALLERY WALK)
               </label>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                 <button
                   onClick={() => setTotalStudents(Math.max(1, totalStudents - 1))}
                   style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: '50%',
-                    background: '#FFFFFF',
-                    border: '1px solid #E8E8E8',
+                    width: 40,
+                    height: 40,
+                    borderRadius: 6,
+                    background: '#333',
+                    border: '1px solid #444',
                     fontSize: 20,
+                    color: '#888',
                     cursor: 'pointer',
                   }}
                 >
                   -
                 </button>
-                <span style={{ fontSize: 24, fontWeight: 600, color: '#1a1f3c', minWidth: 40, textAlign: 'center' }}>
+                <span style={{
+                  fontSize: 28,
+                  fontWeight: 700,
+                  color: '#e0e0e0',
+                  minWidth: 50,
+                  textAlign: 'center',
+                  fontFamily: "'Courier New', monospace",
+                }}>
                   {totalStudents}
                 </span>
                 <button
                   onClick={() => setTotalStudents(totalStudents + 1)}
                   style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: '50%',
-                    background: '#FFFFFF',
-                    border: '1px solid #E8E8E8',
+                    width: 40,
+                    height: 40,
+                    borderRadius: 6,
+                    background: '#333',
+                    border: '1px solid #444',
                     fontSize: 20,
+                    color: '#888',
                     cursor: 'pointer',
                   }}
                 >
                   +
                 </button>
-                <span style={{ fontSize: 12, color: '#888', marginLeft: 12 }}>
-                  Total time: {totalStudents * Math.ceil(totalTime / 60)} min
+                <span style={{ fontSize: 12, color: '#666', marginLeft: 12 }}>
+                  Total: {totalStudents * Math.ceil(totalTime / 60)} min
                 </span>
               </div>
             </div>
@@ -493,9 +691,13 @@ export default function CritiqueTimerPage() {
       )}
 
       <style jsx global>{`
-        @keyframes pulse {
+        @keyframes blink {
           0%, 100% { opacity: 1; }
-          50% { opacity: 0.5; }
+          50% { opacity: 0.3; }
+        }
+        @keyframes urgentPulse {
+          0%, 100% { opacity: 0.5; }
+          50% { opacity: 1; }
         }
       `}</style>
     </div>
