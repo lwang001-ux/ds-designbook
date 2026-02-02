@@ -3179,12 +3179,14 @@ export default function HomePage() {
                 IB Lesson Formatter
               </button>
 
-              {/* Critique Timer */}
-              <button style={{
+              {/* Critique Timer - Opens in new window */}
+              <button
+                onClick={() => window.open('/timer', 'CritiqueTimer', 'width=800,height=700,menubar=no,toolbar=no,location=no,status=no')}
+                style={{
                 width: '100%',
                 padding: '8px 10px',
                 background: '#FFFFFF',
-                border: '1px solid #E8E8E8',
+                border: '1px solid #FFE500',
                 borderRadius: 10,
                 color: '#1a1f3c',
                 fontSize: 10,
@@ -3196,14 +3198,19 @@ export default function HomePage() {
               }}>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FFE500" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                 Critique Timer
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="1.5" style={{ marginLeft: 'auto' }}>
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+                </svg>
               </button>
 
-              {/* Random Student Picker */}
-              <button style={{
+              {/* Random Student Picker - Opens in new window */}
+              <button
+                onClick={() => window.open('/picker', 'RandomPicker', 'width=900,height=700,menubar=no,toolbar=no,location=no,status=no')}
+                style={{
                 width: '100%',
                 padding: '8px 10px',
                 background: '#FFFFFF',
-                border: '1px solid #E8E8E8',
+                border: '1px solid #00D4FF',
                 borderRadius: 10,
                 color: '#1a1f3c',
                 fontSize: 10,
@@ -3215,6 +3222,9 @@ export default function HomePage() {
               }}>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00D4FF" strokeWidth="1.5"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>
                 Random Picker
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="1.5" style={{ marginLeft: 'auto' }}>
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+                </svg>
               </button>
 
               {/* Rubric Builder */}
