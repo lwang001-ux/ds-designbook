@@ -16,12 +16,78 @@ export default function RandomPickerPage() {
   const [showSetup, setShowSetup] = useState(true);
   const spinInterval = useRef<NodeJS.Timeout | null>(null);
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   // Sample class for demo
   const sampleClass = [
     'Alex', 'Jordan', 'Taylor', 'Morgan', 'Casey',
     'Riley', 'Quinn', 'Avery', 'Sage', 'Dakota',
     'Reese', 'Finley', 'Harper', 'Rowan', 'Blair'
   ];
+
+  // Handle file upload for class roster
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const content = e.target?.result as string;
+      let parsedNames: string[] = [];
+
+      if (file.name.endsWith('.csv')) {
+        // Parse CSV - handle various formats
+        const lines = content.split(/\r?\n/);
+        lines.forEach(line => {
+          // Skip empty lines and potential header rows
+          if (!line.trim()) return;
+          const lowerLine = line.toLowerCase();
+          if (lowerLine.includes('name') && lowerLine.includes('student') ||
+              lowerLine.includes('first') && lowerLine.includes('last')) {
+            return; // Skip header row
+          }
+
+          // Split by comma and take first non-empty cell as name
+          // This handles: "Name" or "First,Last" or "ID,Name,Email" formats
+          const cells = line.split(',').map(c => c.trim().replace(/^["']|["']$/g, ''));
+
+          // Try to find a name-like cell (not a number, not an email)
+          for (const cell of cells) {
+            if (cell &&
+                !/^\d+$/.test(cell) && // Not just numbers
+                !cell.includes('@') && // Not an email
+                cell.length > 1 &&
+                cell.length < 50) {
+              parsedNames.push(cell);
+              break;
+            }
+          }
+        });
+      } else {
+        // Parse TXT - one name per line or comma-separated
+        parsedNames = content
+          .split(/[,\n\r]+/)
+          .map(n => n.trim())
+          .filter(n => n.length > 0 && n.length < 50);
+      }
+
+      // Filter out duplicates and existing names
+      const newNames = parsedNames.filter(n =>
+        n.length > 0 && !names.includes(n)
+      );
+
+      if (newNames.length > 0) {
+        setNames([...names, ...newNames]);
+      }
+
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    };
+
+    reader.readAsText(file);
+  };
 
   // Available names (excluding picked if no repeats)
   const availableNames = allowRepeats
@@ -273,6 +339,45 @@ export default function RandomPickerPage() {
                 >
                   Sample
                 </button>
+              </div>
+
+              {/* File Upload for Class Roster */}
+              <div style={{ marginTop: 12 }}>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".csv,.txt"
+                  onChange={handleFileUpload}
+                  style={{ display: 'none' }}
+                  id="roster-upload"
+                />
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    background: '#FFFFFF',
+                    border: '2px dashed #D0D0D0',
+                    borderRadius: 8,
+                    color: '#666',
+                    fontSize: 12,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 8,
+                  }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                  </svg>
+                  Upload Class Roster (.csv, .txt)
+                </button>
+                <div style={{ fontSize: 10, color: '#888', marginTop: 4, textAlign: 'center' }}>
+                  One name per line or comma-separated
+                </div>
               </div>
             </div>
 
