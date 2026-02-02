@@ -1409,6 +1409,657 @@ function IBLessonFormatter({ onClose }: { onClose: () => void }) {
   );
 }
 
+// Design Rubric Builder - generates rubrics for design classes
+function RubricBuilder({ onClose }: { onClose: () => void }) {
+  const [projectName, setProjectName] = useState('');
+  const [projectDescription, setProjectDescription] = useState('');
+  const [gradeLevel, setGradeLevel] = useState<'elementary' | 'middle' | 'high' | 'ib'>('high');
+  const [totalPoints, setTotalPoints] = useState(100);
+  const [selectedCriteria, setSelectedCriteria] = useState<string[]>(['creativity', 'craftsmanship', 'process', 'presentation']);
+  const [outputFormat, setOutputFormat] = useState<'canvas' | 'toddle' | 'google'>('canvas');
+  const [generatedRubric, setGeneratedRubric] = useState<string>('');
+  const [showPreview, setShowPreview] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  // Design-focused criteria options
+  const criteriaOptions = [
+    { id: 'creativity', name: 'Creativity & Originality', desc: 'Unique ideas, innovation, risk-taking' },
+    { id: 'craftsmanship', name: 'Craftsmanship & Skill', desc: 'Technical execution, attention to detail' },
+    { id: 'process', name: 'Design Process', desc: 'Research, iteration, documentation' },
+    { id: 'presentation', name: 'Presentation', desc: 'Final presentation, communication of ideas' },
+    { id: 'problem-solving', name: 'Problem Solving', desc: 'Addressing design challenges effectively' },
+    { id: 'aesthetics', name: 'Visual Aesthetics', desc: 'Composition, color, typography, balance' },
+    { id: 'concept', name: 'Concept Development', desc: 'Strength and clarity of central idea' },
+    { id: 'research', name: 'Research & Context', desc: 'Understanding of audience, context, precedents' },
+    { id: 'collaboration', name: 'Collaboration', desc: 'Teamwork, feedback integration, peer support' },
+    { id: 'reflection', name: 'Reflection', desc: 'Self-assessment, growth mindset, learning from critique' },
+  ];
+
+  // Grade-level appropriate language
+  const gradeLevelDescriptors = {
+    elementary: {
+      excellent: 'Amazing',
+      good: 'Great',
+      developing: 'Getting There',
+      beginning: 'Just Starting',
+    },
+    middle: {
+      excellent: 'Exceeds Expectations',
+      good: 'Meets Expectations',
+      developing: 'Approaching Expectations',
+      beginning: 'Beginning',
+    },
+    high: {
+      excellent: 'Exemplary',
+      good: 'Proficient',
+      developing: 'Developing',
+      beginning: 'Emerging',
+    },
+    ib: {
+      excellent: 'Excellent (7-8)',
+      good: 'Good (5-6)',
+      developing: 'Adequate (3-4)',
+      beginning: 'Limited (1-2)',
+    },
+  };
+
+  // Detailed descriptors for each criterion at each level
+  const criteriaDescriptors: Record<string, Record<string, string>> = {
+    creativity: {
+      excellent: 'Demonstrates exceptional originality and innovation. Takes meaningful creative risks that enhance the work. Ideas are fresh, unexpected, and personally meaningful.',
+      good: 'Shows solid creativity with original ideas. Some creative risks are taken. Work demonstrates personal voice and thoughtful choices.',
+      developing: 'Some original elements present but relies on common solutions. Limited risk-taking. Beginning to develop personal creative voice.',
+      beginning: 'Work lacks originality, relies heavily on copying or basic templates. Little evidence of creative thinking or personal expression.',
+    },
+    craftsmanship: {
+      excellent: 'Outstanding technical execution with meticulous attention to detail. Skillful use of tools/materials. Finished work is polished and professional quality.',
+      good: 'Good technical skills demonstrated. Most details are well-executed. Minor refinements would enhance the work.',
+      developing: 'Basic technical skills shown. Some areas need more attention to detail. Execution is inconsistent.',
+      beginning: 'Technical execution needs significant improvement. Many errors or rough areas. Limited control of tools/materials.',
+    },
+    process: {
+      excellent: 'Thorough design process documented with rich iteration. Multiple concepts explored and refined. Clear evidence of research, sketching, and revision.',
+      good: 'Good documentation of design process. Several ideas explored before final direction. Evidence of iteration and improvement.',
+      developing: 'Some process documentation but limited exploration. Jumps quickly to final solution. Minimal iteration shown.',
+      beginning: 'Little to no process documentation. No evidence of exploration or iteration. Went straight to final without planning.',
+    },
+    presentation: {
+      excellent: 'Presentation is compelling, clear, and professionally executed. Ideas communicated effectively. Visual/verbal presentation enhances understanding.',
+      good: 'Presentation is clear and organized. Ideas are communicated well. Minor improvements would strengthen delivery.',
+      developing: 'Presentation is somewhat unclear or disorganized. Main ideas present but communication could be stronger.',
+      beginning: 'Presentation is confusing or incomplete. Difficult to understand the work or design decisions.',
+    },
+    'problem-solving': {
+      excellent: 'Identifies complex design problems and develops innovative, effective solutions. Considers multiple constraints and user needs.',
+      good: 'Identifies design problems and develops workable solutions. Addresses main constraints and considerations.',
+      developing: 'Identifies basic problems but solutions are surface-level. Some constraints overlooked.',
+      beginning: 'Struggles to identify design problems. Solutions don\'t address core challenges.',
+    },
+    aesthetics: {
+      excellent: 'Exceptional visual design with sophisticated use of composition, color, typography, and visual hierarchy. Creates strong visual impact.',
+      good: 'Good visual design choices. Effective use of design elements. Aesthetically pleasing and appropriate.',
+      developing: 'Basic visual design. Some effective choices but overall aesthetic needs refinement.',
+      beginning: 'Visual design is weak or inappropriate. Poor use of design elements. Lacks visual appeal.',
+    },
+    concept: {
+      excellent: 'Concept is innovative, clearly articulated, and deeply explored. Strong central idea that drives all design decisions.',
+      good: 'Concept is clear and well-developed. Central idea is evident throughout the work.',
+      developing: 'Concept is present but underdeveloped. Connection between idea and execution is weak.',
+      beginning: 'Concept is unclear or missing. Work lacks a central guiding idea.',
+    },
+    research: {
+      excellent: 'Extensive, relevant research that meaningfully informs design decisions. Deep understanding of audience, context, and precedents.',
+      good: 'Good research conducted. Shows understanding of context and audience. Research connects to design choices.',
+      developing: 'Some research present but superficial. Limited connection between research and final work.',
+      beginning: 'Little to no research evident. Design decisions not informed by context or audience understanding.',
+    },
+    collaboration: {
+      excellent: 'Exceptional team contribution. Actively supports peers, integrates feedback thoughtfully, elevates group work.',
+      good: 'Good team member. Contributes fairly, accepts and gives constructive feedback.',
+      developing: 'Participates in group work but contribution is uneven. Sometimes integrates feedback.',
+      beginning: 'Limited collaboration. Difficulty working with others or accepting feedback.',
+    },
+    reflection: {
+      excellent: 'Deep, insightful reflection on process and growth. Identifies specific learnings and applies them. Shows strong growth mindset.',
+      good: 'Thoughtful reflection on work and process. Identifies areas for growth.',
+      developing: 'Basic reflection present. Surface-level insights about work and learning.',
+      beginning: 'Little to no reflection. Unable to articulate learning or areas for growth.',
+    },
+  };
+
+  const toggleCriteria = (id: string) => {
+    setSelectedCriteria(prev =>
+      prev.includes(id) ? prev.filter(c => c !== id) : [...prev, id]
+    );
+  };
+
+  const pointOptions = [4, 8, 12, 16, 20, 24, 50, 100];
+
+  const generateRubric = () => {
+    const pointsPerCriterion = Math.round(totalPoints / selectedCriteria.length);
+    const levels = gradeLevelDescriptors[gradeLevel];
+    const levelPoints = {
+      excellent: pointsPerCriterion,
+      good: Math.round(pointsPerCriterion * 0.85),
+      developing: Math.round(pointsPerCriterion * 0.70),
+      beginning: Math.round(pointsPerCriterion * 0.50),
+    };
+
+    let rubric = '';
+
+    if (outputFormat === 'canvas') {
+      // Canvas-friendly HTML table format
+      rubric = `<h2>${projectName || 'Design Project'} Rubric</h2>\n`;
+      rubric += `<p><em>${projectDescription || 'Design project assessment rubric'}</em></p>\n`;
+      rubric += `<p><strong>Total Points: ${totalPoints}</strong></p>\n\n`;
+      rubric += `<table border="1" cellpadding="8" cellspacing="0">\n`;
+      rubric += `<tr style="background-color: #f0f0f0;">\n`;
+      rubric += `  <th>Criteria</th>\n`;
+      rubric += `  <th>${levels.excellent}<br/>(${levelPoints.excellent} pts)</th>\n`;
+      rubric += `  <th>${levels.good}<br/>(${levelPoints.good} pts)</th>\n`;
+      rubric += `  <th>${levels.developing}<br/>(${levelPoints.developing} pts)</th>\n`;
+      rubric += `  <th>${levels.beginning}<br/>(${levelPoints.beginning} pts)</th>\n`;
+      rubric += `</tr>\n`;
+
+      selectedCriteria.forEach(criterionId => {
+        const criterion = criteriaOptions.find(c => c.id === criterionId);
+        const descriptors = criteriaDescriptors[criterionId];
+        if (criterion && descriptors) {
+          rubric += `<tr>\n`;
+          rubric += `  <td><strong>${criterion.name}</strong><br/><em>${criterion.desc}</em></td>\n`;
+          rubric += `  <td>${descriptors.excellent}</td>\n`;
+          rubric += `  <td>${descriptors.good}</td>\n`;
+          rubric += `  <td>${descriptors.developing}</td>\n`;
+          rubric += `  <td>${descriptors.beginning}</td>\n`;
+          rubric += `</tr>\n`;
+        }
+      });
+
+      rubric += `</table>`;
+    } else if (outputFormat === 'google') {
+      // Plain text table for Google Classroom
+      rubric = `${projectName || 'Design Project'} RUBRIC\n`;
+      rubric += `${'='.repeat(50)}\n`;
+      rubric += `${projectDescription || 'Design project assessment rubric'}\n`;
+      rubric += `Total Points: ${totalPoints}\n\n`;
+
+      selectedCriteria.forEach(criterionId => {
+        const criterion = criteriaOptions.find(c => c.id === criterionId);
+        const descriptors = criteriaDescriptors[criterionId];
+        if (criterion && descriptors) {
+          rubric += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+          rubric += `📐 ${criterion.name.toUpperCase()} (${pointsPerCriterion} points)\n`;
+          rubric += `   ${criterion.desc}\n\n`;
+          rubric += `   ⭐ ${levels.excellent} (${levelPoints.excellent} pts)\n`;
+          rubric += `   ${descriptors.excellent}\n\n`;
+          rubric += `   ✓ ${levels.good} (${levelPoints.good} pts)\n`;
+          rubric += `   ${descriptors.good}\n\n`;
+          rubric += `   ◐ ${levels.developing} (${levelPoints.developing} pts)\n`;
+          rubric += `   ${descriptors.developing}\n\n`;
+          rubric += `   ○ ${levels.beginning} (${levelPoints.beginning} pts)\n`;
+          rubric += `   ${descriptors.beginning}\n\n`;
+        }
+      });
+    } else {
+      // Toddle - CSV-like format
+      rubric = `Criterion,${levels.excellent} (${levelPoints.excellent}),${levels.good} (${levelPoints.good}),${levels.developing} (${levelPoints.developing}),${levels.beginning} (${levelPoints.beginning})\n`;
+
+      selectedCriteria.forEach(criterionId => {
+        const criterion = criteriaOptions.find(c => c.id === criterionId);
+        const descriptors = criteriaDescriptors[criterionId];
+        if (criterion && descriptors) {
+          rubric += `"${criterion.name}","${descriptors.excellent}","${descriptors.good}","${descriptors.developing}","${descriptors.beginning}"\n`;
+        }
+      });
+    }
+
+    setGeneratedRubric(rubric);
+    setShowPreview(true);
+  };
+
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(generatedRubric);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
+  };
+
+  return (
+    <div style={{
+      position: 'fixed',
+      inset: 0,
+      background: 'rgba(0,0,0,0.3)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 1000,
+    }} onClick={onClose}>
+      <div style={{
+        background: '#FFFFFF',
+        borderRadius: 16,
+        padding: 0,
+        width: '90%',
+        maxWidth: 750,
+        maxHeight: '90vh',
+        overflow: 'hidden',
+        border: '1px solid #E8E8E8',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+      }} onClick={e => e.stopPropagation()}>
+        {/* Header */}
+        <div style={{
+          padding: '16px 20px',
+          borderBottom: '1px solid #E8E8E8',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#EC008C" strokeWidth="1.5">
+              <rect x="3" y="3" width="7" height="7" rx="1"/>
+              <rect x="14" y="3" width="7" height="7" rx="1"/>
+              <rect x="3" y="14" width="7" height="7" rx="1"/>
+              <rect x="14" y="14" width="7" height="7" rx="1"/>
+            </svg>
+            <div>
+              <h3 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: '#1a1f3c' }}>Design Rubric Builder</h3>
+              <p style={{ margin: 0, fontSize: 10, color: '#888' }}>Create rubrics for Canvas, Toddle, or Google Classroom</p>
+            </div>
+          </div>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="1.5">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+
+        {/* Content */}
+        <div style={{ padding: 20, maxHeight: 'calc(90vh - 140px)', overflow: 'auto' }}>
+          {!showPreview ? (
+            <>
+              {/* Project Info */}
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ fontSize: 11, fontWeight: 600, color: '#1a1f3c', display: 'block', marginBottom: 6 }}>
+                  Project Name
+                </label>
+                <input
+                  type="text"
+                  value={projectName}
+                  onChange={(e) => setProjectName(e.target.value)}
+                  placeholder="e.g., Logo Design Project, Poster Campaign, App Prototype"
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    border: '1px solid #E8E8E8',
+                    borderRadius: 10,
+                    fontSize: 12,
+                  }}
+                />
+              </div>
+
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ fontSize: 11, fontWeight: 600, color: '#1a1f3c', display: 'block', marginBottom: 6 }}>
+                  Project Description (optional)
+                </label>
+                <textarea
+                  value={projectDescription}
+                  onChange={(e) => setProjectDescription(e.target.value)}
+                  placeholder="Brief description of the project requirements..."
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    border: '1px solid #E8E8E8',
+                    borderRadius: 10,
+                    fontSize: 12,
+                    minHeight: 60,
+                    resize: 'vertical',
+                    fontFamily: 'inherit',
+                  }}
+                />
+              </div>
+
+              {/* Grade Level & Points */}
+              <div style={{ display: 'flex', gap: 16, marginBottom: 20 }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ fontSize: 11, fontWeight: 600, color: '#1a1f3c', display: 'block', marginBottom: 6 }}>
+                    Grade Level
+                  </label>
+                  <div style={{ display: 'flex', gap: 6 }}>
+                    {[
+                      { id: 'elementary', label: 'K-5' },
+                      { id: 'middle', label: '6-8' },
+                      { id: 'high', label: '9-12' },
+                      { id: 'ib', label: 'IB' },
+                    ].map(level => (
+                      <button
+                        key={level.id}
+                        onClick={() => setGradeLevel(level.id as typeof gradeLevel)}
+                        style={{
+                          flex: 1,
+                          padding: '8px',
+                          background: gradeLevel === level.id ? '#FAFAFA' : '#FFFFFF',
+                          border: gradeLevel === level.id ? '1px solid #00D4FF' : '1px solid #E8E8E8',
+                          borderRadius: 8,
+                          fontSize: 10,
+                          fontWeight: gradeLevel === level.id ? 600 : 400,
+                          color: gradeLevel === level.id ? '#00D4FF' : '#888',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        {level.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div style={{ flex: 1 }}>
+                  <label style={{ fontSize: 11, fontWeight: 600, color: '#1a1f3c', display: 'block', marginBottom: 6 }}>
+                    Total Points
+                  </label>
+                  <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                    {pointOptions.map(pts => (
+                      <button
+                        key={pts}
+                        onClick={() => setTotalPoints(pts)}
+                        style={{
+                          padding: '6px 10px',
+                          background: totalPoints === pts ? '#FAFAFA' : '#FFFFFF',
+                          border: totalPoints === pts ? '1px solid #FFE500' : '1px solid #E8E8E8',
+                          borderRadius: 8,
+                          fontSize: 10,
+                          fontWeight: totalPoints === pts ? 600 : 400,
+                          color: totalPoints === pts ? '#1a1f3c' : '#888',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        {pts}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Criteria Selection */}
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ fontSize: 11, fontWeight: 600, color: '#1a1f3c', display: 'block', marginBottom: 4 }}>
+                  Assessment Criteria
+                </label>
+                <p style={{ fontSize: 10, color: '#888', margin: '0 0 10px' }}>
+                  Select the criteria to include (points will be divided equally)
+                </p>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+                  {criteriaOptions.map(criterion => (
+                    <button
+                      key={criterion.id}
+                      onClick={() => toggleCriteria(criterion.id)}
+                      style={{
+                        padding: '10px 12px',
+                        background: selectedCriteria.includes(criterion.id) ? '#FDF2F8' : '#FFFFFF',
+                        border: selectedCriteria.includes(criterion.id) ? '1px solid #EC008C' : '1px solid #E8E8E8',
+                        borderRadius: 10,
+                        textAlign: 'left',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <div style={{
+                        fontSize: 11,
+                        fontWeight: 500,
+                        color: selectedCriteria.includes(criterion.id) ? '#EC008C' : '#1a1f3c',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 6,
+                      }}>
+                        <span style={{
+                          width: 14,
+                          height: 14,
+                          borderRadius: 4,
+                          border: selectedCriteria.includes(criterion.id) ? '1px solid #EC008C' : '1px solid #D0D0D0',
+                          background: selectedCriteria.includes(criterion.id) ? '#EC008C' : '#FFFFFF',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0,
+                        }}>
+                          {selectedCriteria.includes(criterion.id) && (
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="3">
+                              <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                          )}
+                        </span>
+                        {criterion.name}
+                      </div>
+                      <div style={{ fontSize: 9, color: '#888', marginTop: 2, marginLeft: 20 }}>{criterion.desc}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Output Format */}
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ fontSize: 11, fontWeight: 600, color: '#1a1f3c', display: 'block', marginBottom: 6 }}>
+                  Output Format
+                </label>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  {[
+                    { id: 'canvas', name: 'Canvas LMS', desc: 'HTML table format', color: '#E74C3C' },
+                    { id: 'google', name: 'Google Classroom', desc: 'Plain text format', color: '#4285F4' },
+                    { id: 'toddle', name: 'Toddle', desc: 'CSV format', color: '#00D4FF' },
+                  ].map(format => (
+                    <button
+                      key={format.id}
+                      onClick={() => setOutputFormat(format.id as typeof outputFormat)}
+                      style={{
+                        flex: 1,
+                        padding: '12px',
+                        background: outputFormat === format.id ? '#FAFAFA' : '#FFFFFF',
+                        border: outputFormat === format.id ? `1px solid ${format.color}` : '1px solid #E8E8E8',
+                        borderRadius: 10,
+                        textAlign: 'center',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <div style={{
+                        fontSize: 11,
+                        fontWeight: outputFormat === format.id ? 600 : 400,
+                        color: outputFormat === format.id ? format.color : '#1a1f3c'
+                      }}>
+                        {format.name}
+                      </div>
+                      <div style={{ fontSize: 9, color: '#888', marginTop: 2 }}>{format.desc}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Points Preview */}
+              {selectedCriteria.length > 0 && (
+                <div style={{
+                  padding: 12,
+                  background: '#FAFAFA',
+                  borderRadius: 10,
+                  border: '1px solid #E8E8E8',
+                }}>
+                  <div style={{ fontSize: 10, color: '#888', marginBottom: 6 }}>Points Distribution</div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                    {selectedCriteria.map(id => {
+                      const criterion = criteriaOptions.find(c => c.id === id);
+                      const points = Math.round(totalPoints / selectedCriteria.length);
+                      return (
+                        <span key={id} style={{
+                          padding: '4px 10px',
+                          background: '#FFFFFF',
+                          border: '1px solid #E8E8E8',
+                          borderRadius: 12,
+                          fontSize: 10,
+                          color: '#1a1f3c',
+                        }}>
+                          {criterion?.name}: <strong>{points} pts</strong>
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            /* Preview Mode */
+            <div>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginBottom: 12,
+              }}>
+                <button
+                  onClick={() => setShowPreview(false)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    padding: '6px 12px',
+                    background: '#FFFFFF',
+                    border: '1px solid #E8E8E8',
+                    borderRadius: 8,
+                    fontSize: 10,
+                    color: '#888',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="15 18 9 12 15 6"/>
+                  </svg>
+                  Back to Edit
+                </button>
+
+                <button
+                  onClick={copyToClipboard}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    padding: '8px 16px',
+                    background: copied ? '#2ECC71' : '#FFFFFF',
+                    border: copied ? '1px solid #2ECC71' : '1px solid #EC008C',
+                    borderRadius: 10,
+                    fontSize: 11,
+                    fontWeight: 600,
+                    color: copied ? '#FFFFFF' : '#EC008C',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  {copied ? (
+                    <>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                      Copied!
+                    </>
+                  ) : (
+                    <>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                      </svg>
+                      Copy to Clipboard
+                    </>
+                  )}
+                </button>
+              </div>
+
+              <div style={{
+                background: '#1a1f3c',
+                borderRadius: 10,
+                padding: 16,
+                maxHeight: 400,
+                overflow: 'auto',
+              }}>
+                <pre style={{
+                  margin: 0,
+                  fontSize: 11,
+                  color: '#E8E8E8',
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-word',
+                  fontFamily: 'Monaco, Consolas, monospace',
+                  lineHeight: 1.5,
+                }}>
+                  {generatedRubric}
+                </pre>
+              </div>
+
+              <div style={{
+                marginTop: 12,
+                padding: 12,
+                background: '#F0FDFF',
+                borderRadius: 10,
+                border: '1px solid #00D4FF',
+              }}>
+                <div style={{ fontSize: 11, fontWeight: 600, color: '#00D4FF', marginBottom: 4 }}>
+                  How to use in {outputFormat === 'canvas' ? 'Canvas' : outputFormat === 'google' ? 'Google Classroom' : 'Toddle'}
+                </div>
+                <div style={{ fontSize: 10, color: '#666', lineHeight: 1.5 }}>
+                  {outputFormat === 'canvas' && (
+                    <>1. Copy the rubric above<br/>2. In Canvas, go to your assignment → Edit<br/>3. In the Rich Content Editor, click HTML Editor ({"</>"})<br/>4. Paste the HTML code<br/>5. Switch back to Rich Content Editor to preview</>
+                  )}
+                  {outputFormat === 'google' && (
+                    <>1. Copy the rubric above<br/>2. In Google Classroom, create/edit an assignment<br/>3. Paste into the description or attach as a document<br/>4. For a formal rubric, paste into Google Docs and format</>
+                  )}
+                  {outputFormat === 'toddle' && (
+                    <>1. Copy the rubric above<br/>2. Save as a .csv file<br/>3. In Toddle, go to Assessments → Import Rubric<br/>4. Upload the CSV file</>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        {!showPreview && (
+          <div style={{
+            padding: '12px 20px',
+            borderTop: '1px solid #E8E8E8',
+            display: 'flex',
+            justifyContent: 'space-between',
+          }}>
+            <button
+              onClick={onClose}
+              style={{
+                padding: '10px 20px',
+                background: '#FFFFFF',
+                border: '1px solid #E8E8E8',
+                borderRadius: 10,
+                fontSize: 11,
+                color: '#888',
+                cursor: 'pointer',
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={generateRubric}
+              disabled={selectedCriteria.length === 0}
+              style={{
+                padding: '10px 20px',
+                background: selectedCriteria.length === 0 ? '#E8E8E8' : '#FFFFFF',
+                border: selectedCriteria.length === 0 ? '1px solid #E8E8E8' : '1px solid #EC008C',
+                borderRadius: 10,
+                fontSize: 11,
+                fontWeight: 600,
+                color: selectedCriteria.length === 0 ? '#888' : '#EC008C',
+                cursor: selectedCriteria.length === 0 ? 'not-allowed' : 'pointer',
+              }}
+            >
+              Generate Rubric
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // Dieter Rams style knob - minimal, functional
 function Knob({ size = 32, active = false, onClick, label }: {
   size?: number; active?: boolean; onClick?: () => void; label?: string
@@ -1770,6 +2421,7 @@ export default function HomePage() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [showAvatarEditor, setShowAvatarEditor] = useState(false);
   const [showIBFormatter, setShowIBFormatter] = useState(false);
+  const [showRubricBuilder, setShowRubricBuilder] = useState(false);
   const [myAvatar, setMyAvatar] = useState<AvatarConfig>({ style: 'block', hair: 'short', accessory: 'none', color: 'cyan' });
   const [draggingId, setDraggingId] = useState<number | null>(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
@@ -2132,11 +2784,13 @@ export default function HomePage() {
               </button>
 
               {/* Rubric Builder */}
-              <button style={{
+              <button
+                onClick={() => setShowRubricBuilder(true)}
+                style={{
                 width: '100%',
                 padding: '8px 10px',
                 background: '#FFFFFF',
-                border: '1px solid #E8E8E8',
+                border: '1px solid #EC008C',
                 borderRadius: 10,
                 color: '#1a1f3c',
                 fontSize: 10,
@@ -2456,6 +3110,11 @@ export default function HomePage() {
       {/* IB Lesson Formatter Modal */}
       {showIBFormatter && (
         <IBLessonFormatter onClose={() => setShowIBFormatter(false)} />
+      )}
+
+      {/* Rubric Builder Modal */}
+      {showRubricBuilder && (
+        <RubricBuilder onClose={() => setShowRubricBuilder(false)} />
       )}
     </div>
   );
