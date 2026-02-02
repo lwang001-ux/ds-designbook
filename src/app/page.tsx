@@ -1413,13 +1413,14 @@ function IBLessonFormatter({ onClose }: { onClose: () => void }) {
 function RubricBuilder({ onClose }: { onClose: () => void }) {
   const [projectName, setProjectName] = useState('');
   const [projectDescription, setProjectDescription] = useState('');
-  const [gradeLevel, setGradeLevel] = useState<'elementary' | 'middle' | 'high' | 'ib'>('high');
+  const [gradeLevel, setGradeLevel] = useState<'elementary' | 'middle' | 'high' | 'ib-myp' | 'ib-dp'>('high');
   const [totalPoints, setTotalPoints] = useState(100);
   const [selectedCriteria, setSelectedCriteria] = useState<string[]>(['creativity', 'craftsmanship', 'process', 'presentation']);
   const [outputFormat, setOutputFormat] = useState<'canvas' | 'toddle' | 'google'>('canvas');
   const [generatedRubric, setGeneratedRubric] = useState<string>('');
   const [showPreview, setShowPreview] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [useIBRubric, setUseIBRubric] = useState(true);
 
   // Design-focused criteria options
   const criteriaOptions = [
@@ -1455,13 +1456,176 @@ function RubricBuilder({ onClose }: { onClose: () => void }) {
       developing: 'Developing',
       beginning: 'Emerging',
     },
-    ib: {
-      excellent: 'Excellent (7-8)',
-      good: 'Good (5-6)',
-      developing: 'Adequate (3-4)',
-      beginning: 'Limited (1-2)',
+    'ib-myp': {
+      excellent: '7-8',
+      good: '5-6',
+      developing: '3-4',
+      beginning: '1-2',
+    },
+    'ib-dp': {
+      excellent: '5-6',
+      good: '3-4',
+      developing: '2',
+      beginning: '1',
     },
   };
+
+  // Official IB MYP Design Criteria (each out of 8 marks)
+  const mypDesignCriteria = [
+    {
+      id: 'myp-a',
+      name: 'Criterion A: Inquiring and Analyzing',
+      strands: [
+        'Explain and justify the need for a solution to a problem',
+        'State and prioritize the main points of research needed',
+        'Describe the main features of an existing product that inspires a solution',
+        'Present the main findings of relevant research',
+      ],
+      levels: {
+        '7-8': 'The student explains and justifies the need for a solution to a problem for a specified client/target audience. The student states and prioritizes the primary and secondary research needed to develop a solution, with excellent justification. The student describes the relevant existing product(s) that inspire(s) a solution in detail. The student presents the research findings in detail.',
+        '5-6': 'The student explains the need for a solution to a problem for a specified client/target audience. The student states the research needed to develop a solution, with some prioritization. The student describes the relevant existing product(s) that inspire(s) a solution. The student presents the research findings.',
+        '3-4': 'The student outlines the need for a solution to a problem for a client/target audience. The student outlines some of the research needed. The student outlines some existing product(s) that inspire(s) a solution. The student outlines some research findings.',
+        '1-2': 'The student states the need for a solution to a problem. The student states some points of research needed. The student states an existing product that inspires a solution. The student states some research findings.',
+      },
+    },
+    {
+      id: 'myp-b',
+      name: 'Criterion B: Developing Ideas',
+      strands: [
+        'Develop design specifications',
+        'Develop a range of feasible design ideas',
+        'Present the final chosen design',
+        'Create a detailed planning drawing/diagram',
+      ],
+      levels: {
+        '7-8': 'The student develops a detailed design specification, explaining the success criteria. The student develops a range of feasible design ideas that address the design specification and can be evaluated against it. The student presents the final chosen design and justifies fully its selection. The student develops detailed and accurate planning documents.',
+        '5-6': 'The student develops a design specification that identifies the success criteria. The student develops a range of feasible design ideas that address the design specification. The student presents the final chosen design and justifies its selection. The student develops accurate planning documents.',
+        '3-4': 'The student develops a design specification that outlines some success criteria. The student develops some feasible design ideas. The student presents the chosen design. The student creates planning documents.',
+        '1-2': 'The student lists some success criteria. The student presents one or more design idea(s). The student creates incomplete planning documents.',
+      },
+    },
+    {
+      id: 'myp-c',
+      name: 'Criterion C: Creating the Solution',
+      strands: [
+        'Construct a logical plan for the creation of the solution',
+        'Demonstrate excellent technical skills when making the solution',
+        'Follow the plan to create the solution',
+        'Fully justify changes made to the plan when creating the solution',
+      ],
+      levels: {
+        '7-8': 'The student constructs a detailed and logical plan that describes the efficient use of time and resources. The student demonstrates excellent technical skills when making the solution. The student follows the plan to create a solution that functions as intended and is presented appropriately. The student fully justifies changes made to the chosen design and plan.',
+        '5-6': 'The student constructs a logical plan that considers time and resources. The student demonstrates competent technical skills when making the solution. The student follows the plan to create a solution that functions as intended. The student explains changes made to the chosen design and plan.',
+        '3-4': 'The student constructs a plan that contains some details. The student demonstrates satisfactory technical skills when making the solution. The student creates a solution that partially functions as intended. The student outlines changes made.',
+        '1-2': 'The student creates an incomplete plan. The student demonstrates minimal technical skills. The student creates a solution that does not function as intended.',
+      },
+    },
+    {
+      id: 'myp-d',
+      name: 'Criterion D: Evaluating',
+      strands: [
+        'Design detailed and relevant testing methods',
+        'Critically evaluate the success of the solution',
+        'Explain how the solution could be improved',
+        'Explain the impact of the solution on the client/target audience',
+      ],
+      levels: {
+        '7-8': 'The student designs detailed and relevant testing methods that generate data to measure the success of the solution. The student critically evaluates the success of the solution against the design specification based on authentic product testing. The student explains how the solution could be improved. The student explains the impact of the solution on the client/target audience.',
+        '5-6': 'The student designs relevant testing methods that generate data to measure the success of the solution. The student evaluates the success of the solution against the design specification based on product testing. The student outlines how the solution could be improved. The student outlines the impact on the client/target audience.',
+        '3-4': 'The student outlines simple testing methods. The student outlines the success of the solution against the design specification. The student outlines improvements. The student outlines the impact.',
+        '1-2': 'The student states a testing method. The student states the success of the solution. The student states an improvement. The student states an impact.',
+      },
+    },
+  ];
+
+  // Official IB DP Design Technology Criteria (Internal Assessment - Design Project)
+  const dpDesignCriteria = [
+    {
+      id: 'dp-a',
+      name: 'Criterion A: Analysis of an Opportunity or Problem',
+      maxMarks: 6,
+      strands: [
+        'Identification and analysis of a real opportunity/problem',
+        'Research into the nature of the opportunity/problem',
+        'Identification of relevant factors',
+        'Analysis of relevant existing products',
+      ],
+      levels: {
+        '5-6': 'The student identifies and analyzes an opportunity/problem in depth. Research is thorough and relevant. All relevant factors are identified and prioritized. Existing products are analyzed in detail with excellent connections to the design opportunity.',
+        '3-4': 'The student identifies and analyzes an opportunity/problem adequately. Research is adequate and mostly relevant. Most relevant factors are identified. Existing products are analyzed with some connections to the design opportunity.',
+        '2': 'The student identifies an opportunity/problem. Research is superficial. Some relevant factors are identified. Existing products are described.',
+        '1': 'The student states an opportunity/problem. Research is minimal. Few factors identified. Existing products are listed.',
+      },
+    },
+    {
+      id: 'dp-b',
+      name: 'Criterion B: Conceptual Design',
+      maxMarks: 6,
+      strands: [
+        'Development of a design brief and specification',
+        'Generation and consideration of feasible design concepts',
+        'Evaluation of concepts against the specification',
+        'Selection and justification of the chosen design',
+      ],
+      levels: {
+        '5-6': 'The design brief and specification are detailed and justified. A range of feasible design concepts are generated and developed. Concepts are evaluated objectively against the specification. The chosen design is fully justified.',
+        '3-4': 'The design brief and specification are appropriate. Some feasible design concepts are generated. Concepts are evaluated against the specification. The chosen design is justified.',
+        '2': 'The design brief and specification are outlined. Limited design concepts are generated. Some evaluation against specification. Basic justification for chosen design.',
+        '1': 'A basic design brief/specification exists. One design concept presented. Minimal evaluation. Little justification.',
+      },
+    },
+    {
+      id: 'dp-c',
+      name: 'Criterion C: Development of Detailed Design',
+      maxMarks: 12,
+      strands: [
+        'Detailed development of the chosen design',
+        'Evidence of iteration based on feedback/testing',
+        'Detailed drawings/diagrams/models',
+        'Planning for production including materials, tools, processes',
+      ],
+      levels: {
+        '5-6': 'The chosen design is developed in thorough detail with excellent iteration. Comprehensive detailed drawings/diagrams/models. Complete production planning with excellent justification of materials, tools, and processes.',
+        '3-4': 'The chosen design is developed in adequate detail with some iteration. Adequate detailed drawings/diagrams/models. Production planning with justification of materials, tools, and processes.',
+        '2': 'The chosen design is developed with limited detail. Basic drawings/diagrams. Some production planning.',
+        '1': 'Minimal design development. Incomplete drawings/diagrams. Limited production planning.',
+      },
+    },
+    {
+      id: 'dp-d',
+      name: 'Criterion D: Testing and Evaluation',
+      maxMarks: 6,
+      strands: [
+        'Testing of the prototype against the specification',
+        'Objective evaluation of the solution',
+        'Recommendations for further development',
+        'Impact assessment (social, environmental, economic)',
+      ],
+      levels: {
+        '5-6': 'Thorough testing against all aspects of specification. Objective and insightful evaluation. Detailed recommendations for improvement. Comprehensive impact assessment.',
+        '3-4': 'Adequate testing against specification. Sound evaluation. Appropriate recommendations. Impact assessment included.',
+        '2': 'Basic testing. Some evaluation. Limited recommendations. Basic impact consideration.',
+        '1': 'Minimal testing. Superficial evaluation. Few recommendations. Limited impact consideration.',
+      },
+    },
+    {
+      id: 'dp-e',
+      name: 'Criterion E: Commercial Production',
+      maxMarks: 6,
+      strands: [
+        'Modifications for commercial manufacture',
+        'Scale of production considerations',
+        'Quality control measures',
+        'Economic viability',
+      ],
+      levels: {
+        '5-6': 'Detailed modifications for commercial production. Thorough consideration of scale. Comprehensive quality control. Detailed economic analysis.',
+        '3-4': 'Appropriate modifications for production. Adequate consideration of scale. Quality control addressed. Economic considerations included.',
+        '2': 'Basic modifications suggested. Some scale consideration. Basic quality control. Limited economic consideration.',
+        '1': 'Minimal modifications. Little consideration of scale or quality. No economic analysis.',
+      },
+    },
+  ];
 
   // Detailed descriptors for each criterion at each level
   const criteriaDescriptors: Record<string, Record<string, string>> = {
@@ -1536,81 +1700,175 @@ function RubricBuilder({ onClose }: { onClose: () => void }) {
   const pointOptions = [4, 8, 12, 16, 20, 24, 50, 100];
 
   const generateRubric = () => {
-    const pointsPerCriterion = Math.round(totalPoints / selectedCriteria.length);
-    const levels = gradeLevelDescriptors[gradeLevel];
-    const levelPoints = {
-      excellent: pointsPerCriterion,
-      good: Math.round(pointsPerCriterion * 0.85),
-      developing: Math.round(pointsPerCriterion * 0.70),
-      beginning: Math.round(pointsPerCriterion * 0.50),
-    };
-
     let rubric = '';
 
-    if (outputFormat === 'canvas') {
-      // Canvas-friendly HTML table format
-      rubric = `<h2>${projectName || 'Design Project'} Rubric</h2>\n`;
-      rubric += `<p><em>${projectDescription || 'Design project assessment rubric'}</em></p>\n`;
-      rubric += `<p><strong>Total Points: ${totalPoints}</strong></p>\n\n`;
-      rubric += `<table border="1" cellpadding="8" cellspacing="0">\n`;
-      rubric += `<tr style="background-color: #f0f0f0;">\n`;
-      rubric += `  <th>Criteria</th>\n`;
-      rubric += `  <th>${levels.excellent}<br/>(${levelPoints.excellent} pts)</th>\n`;
-      rubric += `  <th>${levels.good}<br/>(${levelPoints.good} pts)</th>\n`;
-      rubric += `  <th>${levels.developing}<br/>(${levelPoints.developing} pts)</th>\n`;
-      rubric += `  <th>${levels.beginning}<br/>(${levelPoints.beginning} pts)</th>\n`;
-      rubric += `</tr>\n`;
+    // Handle IB MYP Rubric
+    if (gradeLevel === 'ib-myp') {
+      if (outputFormat === 'canvas') {
+        rubric = `<h2>${projectName || 'MYP Design Project'} - Assessment Rubric</h2>\n`;
+        rubric += `<p><em>${projectDescription || 'IB MYP Design assessment using official criteria'}</em></p>\n`;
+        rubric += `<p><strong>Total Marks: 32 (8 marks per criterion)</strong></p>\n\n`;
 
-      selectedCriteria.forEach(criterionId => {
-        const criterion = criteriaOptions.find(c => c.id === criterionId);
-        const descriptors = criteriaDescriptors[criterionId];
-        if (criterion && descriptors) {
-          rubric += `<tr>\n`;
-          rubric += `  <td><strong>${criterion.name}</strong><br/><em>${criterion.desc}</em></td>\n`;
-          rubric += `  <td>${descriptors.excellent}</td>\n`;
-          rubric += `  <td>${descriptors.good}</td>\n`;
-          rubric += `  <td>${descriptors.developing}</td>\n`;
-          rubric += `  <td>${descriptors.beginning}</td>\n`;
-          rubric += `</tr>\n`;
-        }
-      });
+        mypDesignCriteria.forEach(criterion => {
+          rubric += `<h3>${criterion.name}</h3>\n`;
+          rubric += `<p><em>Strands: ${criterion.strands.join(' | ')}</em></p>\n`;
+          rubric += `<table border="1" cellpadding="8" cellspacing="0" style="width:100%">\n`;
+          rubric += `<tr style="background-color: #00D4FF; color: white;">\n`;
+          rubric += `  <th>7-8</th><th>5-6</th><th>3-4</th><th>1-2</th>\n`;
+          rubric += `</tr>\n<tr>\n`;
+          rubric += `  <td>${criterion.levels['7-8']}</td>\n`;
+          rubric += `  <td>${criterion.levels['5-6']}</td>\n`;
+          rubric += `  <td>${criterion.levels['3-4']}</td>\n`;
+          rubric += `  <td>${criterion.levels['1-2']}</td>\n`;
+          rubric += `</tr>\n</table>\n<br/>\n`;
+        });
+      } else if (outputFormat === 'google') {
+        rubric = `${projectName || 'MYP Design Project'} - ASSESSMENT RUBRIC\n`;
+        rubric += `${'═'.repeat(60)}\n`;
+        rubric += `${projectDescription || 'IB MYP Design assessment using official criteria'}\n`;
+        rubric += `Total Marks: 32 (8 marks per criterion)\n\n`;
 
-      rubric += `</table>`;
-    } else if (outputFormat === 'google') {
-      // Plain text table for Google Classroom
-      rubric = `${projectName || 'Design Project'} RUBRIC\n`;
-      rubric += `${'='.repeat(50)}\n`;
-      rubric += `${projectDescription || 'Design project assessment rubric'}\n`;
-      rubric += `Total Points: ${totalPoints}\n\n`;
+        mypDesignCriteria.forEach(criterion => {
+          rubric += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+          rubric += `📐 ${criterion.name.toUpperCase()}\n`;
+          rubric += `   Maximum: 8 marks\n\n`;
+          rubric += `   Strands:\n`;
+          criterion.strands.forEach(strand => {
+            rubric += `   • ${strand}\n`;
+          });
+          rubric += `\n`;
+          rubric += `   ⭐ LEVEL 7-8:\n   ${criterion.levels['7-8']}\n\n`;
+          rubric += `   ✓ LEVEL 5-6:\n   ${criterion.levels['5-6']}\n\n`;
+          rubric += `   ◐ LEVEL 3-4:\n   ${criterion.levels['3-4']}\n\n`;
+          rubric += `   ○ LEVEL 1-2:\n   ${criterion.levels['1-2']}\n\n`;
+        });
+      } else {
+        rubric = `Criterion,7-8 (Excellent),5-6 (Good),3-4 (Adequate),1-2 (Limited)\n`;
+        mypDesignCriteria.forEach(criterion => {
+          rubric += `"${criterion.name}","${criterion.levels['7-8']}","${criterion.levels['5-6']}","${criterion.levels['3-4']}","${criterion.levels['1-2']}"\n`;
+        });
+      }
+    }
+    // Handle IB DP Rubric
+    else if (gradeLevel === 'ib-dp') {
+      if (outputFormat === 'canvas') {
+        rubric = `<h2>${projectName || 'DP Design Technology'} - Internal Assessment Rubric</h2>\n`;
+        rubric += `<p><em>${projectDescription || 'IB DP Design Technology IA assessment using official criteria'}</em></p>\n`;
+        rubric += `<p><strong>Total Marks: 36</strong></p>\n\n`;
 
-      selectedCriteria.forEach(criterionId => {
-        const criterion = criteriaOptions.find(c => c.id === criterionId);
-        const descriptors = criteriaDescriptors[criterionId];
-        if (criterion && descriptors) {
-          rubric += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-          rubric += `📐 ${criterion.name.toUpperCase()} (${pointsPerCriterion} points)\n`;
-          rubric += `   ${criterion.desc}\n\n`;
-          rubric += `   ⭐ ${levels.excellent} (${levelPoints.excellent} pts)\n`;
-          rubric += `   ${descriptors.excellent}\n\n`;
-          rubric += `   ✓ ${levels.good} (${levelPoints.good} pts)\n`;
-          rubric += `   ${descriptors.good}\n\n`;
-          rubric += `   ◐ ${levels.developing} (${levelPoints.developing} pts)\n`;
-          rubric += `   ${descriptors.developing}\n\n`;
-          rubric += `   ○ ${levels.beginning} (${levelPoints.beginning} pts)\n`;
-          rubric += `   ${descriptors.beginning}\n\n`;
-        }
-      });
-    } else {
-      // Toddle - CSV-like format
-      rubric = `Criterion,${levels.excellent} (${levelPoints.excellent}),${levels.good} (${levelPoints.good}),${levels.developing} (${levelPoints.developing}),${levels.beginning} (${levelPoints.beginning})\n`;
+        dpDesignCriteria.forEach(criterion => {
+          rubric += `<h3>${criterion.name} (${criterion.maxMarks} marks)</h3>\n`;
+          rubric += `<p><em>Focus: ${criterion.strands.join(' | ')}</em></p>\n`;
+          rubric += `<table border="1" cellpadding="8" cellspacing="0" style="width:100%">\n`;
+          rubric += `<tr style="background-color: #EC008C; color: white;">\n`;
+          rubric += `  <th>5-6</th><th>3-4</th><th>2</th><th>1</th>\n`;
+          rubric += `</tr>\n<tr>\n`;
+          rubric += `  <td>${criterion.levels['5-6']}</td>\n`;
+          rubric += `  <td>${criterion.levels['3-4']}</td>\n`;
+          rubric += `  <td>${criterion.levels['2']}</td>\n`;
+          rubric += `  <td>${criterion.levels['1']}</td>\n`;
+          rubric += `</tr>\n</table>\n<br/>\n`;
+        });
+      } else if (outputFormat === 'google') {
+        rubric = `${projectName || 'DP Design Technology'} - INTERNAL ASSESSMENT RUBRIC\n`;
+        rubric += `${'═'.repeat(60)}\n`;
+        rubric += `${projectDescription || 'IB DP Design Technology IA assessment'}\n`;
+        rubric += `Total Marks: 36\n\n`;
 
-      selectedCriteria.forEach(criterionId => {
-        const criterion = criteriaOptions.find(c => c.id === criterionId);
-        const descriptors = criteriaDescriptors[criterionId];
-        if (criterion && descriptors) {
-          rubric += `"${criterion.name}","${descriptors.excellent}","${descriptors.good}","${descriptors.developing}","${descriptors.beginning}"\n`;
-        }
-      });
+        dpDesignCriteria.forEach(criterion => {
+          rubric += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+          rubric += `📐 ${criterion.name.toUpperCase()}\n`;
+          rubric += `   Maximum: ${criterion.maxMarks} marks\n\n`;
+          rubric += `   Assessment Focus:\n`;
+          criterion.strands.forEach(strand => {
+            rubric += `   • ${strand}\n`;
+          });
+          rubric += `\n`;
+          rubric += `   ⭐ LEVEL 5-6:\n   ${criterion.levels['5-6']}\n\n`;
+          rubric += `   ✓ LEVEL 3-4:\n   ${criterion.levels['3-4']}\n\n`;
+          rubric += `   ◐ LEVEL 2:\n   ${criterion.levels['2']}\n\n`;
+          rubric += `   ○ LEVEL 1:\n   ${criterion.levels['1']}\n\n`;
+        });
+      } else {
+        rubric = `Criterion,Max Marks,5-6 (Excellent),3-4 (Good),2 (Adequate),1 (Limited)\n`;
+        dpDesignCriteria.forEach(criterion => {
+          rubric += `"${criterion.name}",${criterion.maxMarks},"${criterion.levels['5-6']}","${criterion.levels['3-4']}","${criterion.levels['2']}","${criterion.levels['1']}"\n`;
+        });
+      }
+    }
+    // Handle standard rubric
+    else {
+      const pointsPerCriterion = Math.round(totalPoints / selectedCriteria.length);
+      const levels = gradeLevelDescriptors[gradeLevel];
+      const levelPoints = {
+        excellent: pointsPerCriterion,
+        good: Math.round(pointsPerCriterion * 0.85),
+        developing: Math.round(pointsPerCriterion * 0.70),
+        beginning: Math.round(pointsPerCriterion * 0.50),
+      };
+
+      if (outputFormat === 'canvas') {
+        rubric = `<h2>${projectName || 'Design Project'} Rubric</h2>\n`;
+        rubric += `<p><em>${projectDescription || 'Design project assessment rubric'}</em></p>\n`;
+        rubric += `<p><strong>Total Points: ${totalPoints}</strong></p>\n\n`;
+        rubric += `<table border="1" cellpadding="8" cellspacing="0">\n`;
+        rubric += `<tr style="background-color: #f0f0f0;">\n`;
+        rubric += `  <th>Criteria</th>\n`;
+        rubric += `  <th>${levels.excellent}<br/>(${levelPoints.excellent} pts)</th>\n`;
+        rubric += `  <th>${levels.good}<br/>(${levelPoints.good} pts)</th>\n`;
+        rubric += `  <th>${levels.developing}<br/>(${levelPoints.developing} pts)</th>\n`;
+        rubric += `  <th>${levels.beginning}<br/>(${levelPoints.beginning} pts)</th>\n`;
+        rubric += `</tr>\n`;
+
+        selectedCriteria.forEach(criterionId => {
+          const criterion = criteriaOptions.find(c => c.id === criterionId);
+          const descriptors = criteriaDescriptors[criterionId];
+          if (criterion && descriptors) {
+            rubric += `<tr>\n`;
+            rubric += `  <td><strong>${criterion.name}</strong><br/><em>${criterion.desc}</em></td>\n`;
+            rubric += `  <td>${descriptors.excellent}</td>\n`;
+            rubric += `  <td>${descriptors.good}</td>\n`;
+            rubric += `  <td>${descriptors.developing}</td>\n`;
+            rubric += `  <td>${descriptors.beginning}</td>\n`;
+            rubric += `</tr>\n`;
+          }
+        });
+
+        rubric += `</table>`;
+      } else if (outputFormat === 'google') {
+        rubric = `${projectName || 'Design Project'} RUBRIC\n`;
+        rubric += `${'='.repeat(50)}\n`;
+        rubric += `${projectDescription || 'Design project assessment rubric'}\n`;
+        rubric += `Total Points: ${totalPoints}\n\n`;
+
+        selectedCriteria.forEach(criterionId => {
+          const criterion = criteriaOptions.find(c => c.id === criterionId);
+          const descriptors = criteriaDescriptors[criterionId];
+          if (criterion && descriptors) {
+            rubric += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            rubric += `📐 ${criterion.name.toUpperCase()} (${pointsPerCriterion} points)\n`;
+            rubric += `   ${criterion.desc}\n\n`;
+            rubric += `   ⭐ ${levels.excellent} (${levelPoints.excellent} pts)\n`;
+            rubric += `   ${descriptors.excellent}\n\n`;
+            rubric += `   ✓ ${levels.good} (${levelPoints.good} pts)\n`;
+            rubric += `   ${descriptors.good}\n\n`;
+            rubric += `   ◐ ${levels.developing} (${levelPoints.developing} pts)\n`;
+            rubric += `   ${descriptors.developing}\n\n`;
+            rubric += `   ○ ${levels.beginning} (${levelPoints.beginning} pts)\n`;
+            rubric += `   ${descriptors.beginning}\n\n`;
+          }
+        });
+      } else {
+        rubric = `Criterion,${levels.excellent} (${levelPoints.excellent}),${levels.good} (${levelPoints.good}),${levels.developing} (${levelPoints.developing}),${levels.beginning} (${levelPoints.beginning})\n`;
+
+        selectedCriteria.forEach(criterionId => {
+          const criterion = criteriaOptions.find(c => c.id === criterionId);
+          const descriptors = criteriaDescriptors[criterionId];
+          if (criterion && descriptors) {
+            rubric += `"${criterion.name}","${descriptors.excellent}","${descriptors.good}","${descriptors.developing}","${descriptors.beginning}"\n`;
+          }
+        });
+      }
     }
 
     setGeneratedRubric(rubric);
@@ -1724,21 +1982,37 @@ function RubricBuilder({ onClose }: { onClose: () => void }) {
               <div style={{ display: 'flex', gap: 16, marginBottom: 20 }}>
                 <div style={{ flex: 1 }}>
                   <label style={{ fontSize: 11, fontWeight: 600, color: '#1a1f3c', display: 'block', marginBottom: 6 }}>
-                    Grade Level
+                    Grade Level / Programme
                   </label>
-                  <div style={{ display: 'flex', gap: 6 }}>
+                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                     {[
                       { id: 'elementary', label: 'K-5' },
                       { id: 'middle', label: '6-8' },
                       { id: 'high', label: '9-12' },
-                      { id: 'ib', label: 'IB' },
+                      { id: 'ib-myp', label: 'IB MYP' },
+                      { id: 'ib-dp', label: 'IB DP' },
                     ].map(level => (
                       <button
                         key={level.id}
-                        onClick={() => setGradeLevel(level.id as typeof gradeLevel)}
+                        onClick={() => {
+                          setGradeLevel(level.id as typeof gradeLevel);
+                          // Auto-select IB criteria when IB is selected
+                          if (level.id === 'ib-myp') {
+                            setSelectedCriteria(['myp-a', 'myp-b', 'myp-c', 'myp-d']);
+                            setTotalPoints(32);
+                            setUseIBRubric(true);
+                          } else if (level.id === 'ib-dp') {
+                            setSelectedCriteria(['dp-a', 'dp-b', 'dp-c', 'dp-d', 'dp-e']);
+                            setTotalPoints(36);
+                            setUseIBRubric(true);
+                          } else {
+                            setSelectedCriteria(['creativity', 'craftsmanship', 'process', 'presentation']);
+                            setUseIBRubric(false);
+                          }
+                        }}
                         style={{
-                          flex: 1,
-                          padding: '8px',
+                          flex: level.id.startsWith('ib') ? '0 0 auto' : 1,
+                          padding: '8px 12px',
                           background: gradeLevel === level.id ? '#FAFAFA' : '#FFFFFF',
                           border: gradeLevel === level.id ? '1px solid #00D4FF' : '1px solid #E8E8E8',
                           borderRadius: 8,
@@ -1754,86 +2028,196 @@ function RubricBuilder({ onClose }: { onClose: () => void }) {
                   </div>
                 </div>
 
-                <div style={{ flex: 1 }}>
-                  <label style={{ fontSize: 11, fontWeight: 600, color: '#1a1f3c', display: 'block', marginBottom: 6 }}>
-                    Total Points
-                  </label>
-                  <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                    {pointOptions.map(pts => (
-                      <button
-                        key={pts}
-                        onClick={() => setTotalPoints(pts)}
-                        style={{
-                          padding: '6px 10px',
-                          background: totalPoints === pts ? '#FAFAFA' : '#FFFFFF',
-                          border: totalPoints === pts ? '1px solid #FFE500' : '1px solid #E8E8E8',
-                          borderRadius: 8,
-                          fontSize: 10,
-                          fontWeight: totalPoints === pts ? 600 : 400,
-                          color: totalPoints === pts ? '#1a1f3c' : '#888',
-                          cursor: 'pointer',
-                        }}
-                      >
-                        {pts}
-                      </button>
-                    ))}
+                {!gradeLevel.startsWith('ib') && (
+                  <div style={{ flex: 1 }}>
+                    <label style={{ fontSize: 11, fontWeight: 600, color: '#1a1f3c', display: 'block', marginBottom: 6 }}>
+                      Total Points
+                    </label>
+                    <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                      {pointOptions.map(pts => (
+                        <button
+                          key={pts}
+                          onClick={() => setTotalPoints(pts)}
+                          style={{
+                            padding: '6px 10px',
+                            background: totalPoints === pts ? '#FAFAFA' : '#FFFFFF',
+                            border: totalPoints === pts ? '1px solid #FFE500' : '1px solid #E8E8E8',
+                            borderRadius: 8,
+                            fontSize: 10,
+                            fontWeight: totalPoints === pts ? 600 : 400,
+                            color: totalPoints === pts ? '#1a1f3c' : '#888',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          {pts}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
 
               {/* Criteria Selection */}
               <div style={{ marginBottom: 20 }}>
                 <label style={{ fontSize: 11, fontWeight: 600, color: '#1a1f3c', display: 'block', marginBottom: 4 }}>
-                  Assessment Criteria
+                  {gradeLevel === 'ib-myp' ? 'MYP Design Criteria (Official IB)' :
+                   gradeLevel === 'ib-dp' ? 'DP Design Technology Criteria (Official IB)' :
+                   'Assessment Criteria'}
                 </label>
                 <p style={{ fontSize: 10, color: '#888', margin: '0 0 10px' }}>
-                  Select the criteria to include (points will be divided equally)
+                  {gradeLevel === 'ib-myp' ? 'Official IB MYP Design criteria - each criterion is worth 8 marks' :
+                   gradeLevel === 'ib-dp' ? 'Official IB DP Design Technology IA criteria' :
+                   'Select the criteria to include (points will be divided equally)'}
                 </p>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
-                  {criteriaOptions.map(criterion => (
-                    <button
-                      key={criterion.id}
-                      onClick={() => toggleCriteria(criterion.id)}
-                      style={{
-                        padding: '10px 12px',
-                        background: selectedCriteria.includes(criterion.id) ? '#FDF2F8' : '#FFFFFF',
-                        border: selectedCriteria.includes(criterion.id) ? '1px solid #EC008C' : '1px solid #E8E8E8',
-                        borderRadius: 10,
-                        textAlign: 'left',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      <div style={{
-                        fontSize: 11,
-                        fontWeight: 500,
-                        color: selectedCriteria.includes(criterion.id) ? '#EC008C' : '#1a1f3c',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 6,
-                      }}>
-                        <span style={{
-                          width: 14,
-                          height: 14,
-                          borderRadius: 4,
-                          border: selectedCriteria.includes(criterion.id) ? '1px solid #EC008C' : '1px solid #D0D0D0',
-                          background: selectedCriteria.includes(criterion.id) ? '#EC008C' : '#FFFFFF',
+
+                {/* IB MYP Criteria */}
+                {gradeLevel === 'ib-myp' && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {mypDesignCriteria.map(criterion => (
+                      <div
+                        key={criterion.id}
+                        style={{
+                          padding: '12px 14px',
+                          background: selectedCriteria.includes(criterion.id) ? '#F0FDFF' : '#FFFFFF',
+                          border: selectedCriteria.includes(criterion.id) ? '1px solid #00D4FF' : '1px solid #E8E8E8',
+                          borderRadius: 10,
+                        }}
+                      >
+                        <div style={{
                           display: 'flex',
                           alignItems: 'center',
-                          justifyContent: 'center',
-                          flexShrink: 0,
+                          justifyContent: 'space-between',
+                          marginBottom: 8,
                         }}>
-                          {selectedCriteria.includes(criterion.id) && (
-                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="3">
-                              <polyline points="20 6 9 17 4 12"/>
-                            </svg>
-                          )}
-                        </span>
-                        {criterion.name}
+                          <div style={{
+                            fontSize: 12,
+                            fontWeight: 600,
+                            color: '#1a1f3c',
+                          }}>
+                            {criterion.name}
+                          </div>
+                          <span style={{
+                            padding: '2px 8px',
+                            background: '#00D4FF',
+                            borderRadius: 10,
+                            fontSize: 9,
+                            fontWeight: 600,
+                            color: '#FFFFFF',
+                          }}>
+                            8 marks
+                          </span>
+                        </div>
+                        <div style={{ fontSize: 10, color: '#666', lineHeight: 1.5 }}>
+                          <strong>Strands:</strong>
+                          <ul style={{ margin: '4px 0 0 0', paddingLeft: 16 }}>
+                            {criterion.strands.map((strand, i) => (
+                              <li key={i} style={{ marginBottom: 2 }}>{strand}</li>
+                            ))}
+                          </ul>
+                        </div>
                       </div>
-                      <div style={{ fontSize: 9, color: '#888', marginTop: 2, marginLeft: 20 }}>{criterion.desc}</div>
-                    </button>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* IB DP Criteria */}
+                {gradeLevel === 'ib-dp' && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {dpDesignCriteria.map(criterion => (
+                      <div
+                        key={criterion.id}
+                        style={{
+                          padding: '12px 14px',
+                          background: selectedCriteria.includes(criterion.id) ? '#FDF2F8' : '#FFFFFF',
+                          border: selectedCriteria.includes(criterion.id) ? '1px solid #EC008C' : '1px solid #E8E8E8',
+                          borderRadius: 10,
+                        }}
+                      >
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          marginBottom: 8,
+                        }}>
+                          <div style={{
+                            fontSize: 12,
+                            fontWeight: 600,
+                            color: '#1a1f3c',
+                          }}>
+                            {criterion.name}
+                          </div>
+                          <span style={{
+                            padding: '2px 8px',
+                            background: '#EC008C',
+                            borderRadius: 10,
+                            fontSize: 9,
+                            fontWeight: 600,
+                            color: '#FFFFFF',
+                          }}>
+                            {criterion.maxMarks} marks
+                          </span>
+                        </div>
+                        <div style={{ fontSize: 10, color: '#666', lineHeight: 1.5 }}>
+                          <strong>Assessment focus:</strong>
+                          <ul style={{ margin: '4px 0 0 0', paddingLeft: 16 }}>
+                            {criterion.strands.map((strand, i) => (
+                              <li key={i} style={{ marginBottom: 2 }}>{strand}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Standard Criteria for non-IB */}
+                {!gradeLevel.startsWith('ib') && (
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+                    {criteriaOptions.map(criterion => (
+                      <button
+                        key={criterion.id}
+                        onClick={() => toggleCriteria(criterion.id)}
+                        style={{
+                          padding: '10px 12px',
+                          background: selectedCriteria.includes(criterion.id) ? '#FDF2F8' : '#FFFFFF',
+                          border: selectedCriteria.includes(criterion.id) ? '1px solid #EC008C' : '1px solid #E8E8E8',
+                          borderRadius: 10,
+                          textAlign: 'left',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        <div style={{
+                          fontSize: 11,
+                          fontWeight: 500,
+                          color: selectedCriteria.includes(criterion.id) ? '#EC008C' : '#1a1f3c',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 6,
+                        }}>
+                          <span style={{
+                            width: 14,
+                            height: 14,
+                            borderRadius: 4,
+                            border: selectedCriteria.includes(criterion.id) ? '1px solid #EC008C' : '1px solid #D0D0D0',
+                            background: selectedCriteria.includes(criterion.id) ? '#EC008C' : '#FFFFFF',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0,
+                          }}>
+                            {selectedCriteria.includes(criterion.id) && (
+                              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="3">
+                                <polyline points="20 6 9 17 4 12"/>
+                              </svg>
+                            )}
+                          </span>
+                          {criterion.name}
+                        </div>
+                        <div style={{ fontSize: 9, color: '#888', marginTop: 2, marginLeft: 20 }}>{criterion.desc}</div>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Output Format */}
@@ -1874,7 +2258,7 @@ function RubricBuilder({ onClose }: { onClose: () => void }) {
               </div>
 
               {/* Points Preview */}
-              {selectedCriteria.length > 0 && (
+              {selectedCriteria.length > 0 && !gradeLevel.startsWith('ib') && (
                 <div style={{
                   padding: 12,
                   background: '#FAFAFA',
@@ -1899,6 +2283,56 @@ function RubricBuilder({ onClose }: { onClose: () => void }) {
                         </span>
                       );
                     })}
+                  </div>
+                </div>
+              )}
+
+              {/* IB Marks Summary */}
+              {gradeLevel === 'ib-myp' && (
+                <div style={{
+                  padding: 12,
+                  background: '#F0FDFF',
+                  borderRadius: 10,
+                  border: '1px solid #00D4FF',
+                }}>
+                  <div style={{ fontSize: 10, color: '#00D4FF', fontWeight: 600, marginBottom: 6 }}>IB MYP Design Assessment</div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                    <span style={{ padding: '4px 10px', background: '#FFFFFF', border: '1px solid #E8E8E8', borderRadius: 12, fontSize: 10 }}>
+                      Criterion A: <strong>8 marks</strong>
+                    </span>
+                    <span style={{ padding: '4px 10px', background: '#FFFFFF', border: '1px solid #E8E8E8', borderRadius: 12, fontSize: 10 }}>
+                      Criterion B: <strong>8 marks</strong>
+                    </span>
+                    <span style={{ padding: '4px 10px', background: '#FFFFFF', border: '1px solid #E8E8E8', borderRadius: 12, fontSize: 10 }}>
+                      Criterion C: <strong>8 marks</strong>
+                    </span>
+                    <span style={{ padding: '4px 10px', background: '#FFFFFF', border: '1px solid #E8E8E8', borderRadius: 12, fontSize: 10 }}>
+                      Criterion D: <strong>8 marks</strong>
+                    </span>
+                    <span style={{ padding: '4px 10px', background: '#00D4FF', borderRadius: 12, fontSize: 10, color: '#FFFFFF', fontWeight: 600 }}>
+                      Total: 32 marks
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {gradeLevel === 'ib-dp' && (
+                <div style={{
+                  padding: 12,
+                  background: '#FDF2F8',
+                  borderRadius: 10,
+                  border: '1px solid #EC008C',
+                }}>
+                  <div style={{ fontSize: 10, color: '#EC008C', fontWeight: 600, marginBottom: 6 }}>IB DP Design Technology IA</div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                    {dpDesignCriteria.map(c => (
+                      <span key={c.id} style={{ padding: '4px 10px', background: '#FFFFFF', border: '1px solid #E8E8E8', borderRadius: 12, fontSize: 10 }}>
+                        {c.name.split(':')[0]}: <strong>{c.maxMarks}</strong>
+                      </span>
+                    ))}
+                    <span style={{ padding: '4px 10px', background: '#EC008C', borderRadius: 12, fontSize: 10, color: '#FFFFFF', fontWeight: 600 }}>
+                      Total: 36 marks
+                    </span>
                   </div>
                 </div>
               )}
