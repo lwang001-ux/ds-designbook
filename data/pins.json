@@ -1,0 +1,21 @@
+[
+  {
+    "id": "welcome-pin-1",
+    "type": "quote",
+    "content": {
+      "quote": "Welcome to DS DesignBook! Pin your ideas, projects, and inspiration here.",
+      "author": "The Design Team"
+    },
+    "position": { "x": 45, "y": 30 },
+    "rotation": -2,
+    "pinColor": "#4CAF50",
+    "zIndex": 1,
+    "authorId": "admin-1",
+    "authorName": "Admin User",
+    "authorPhotoURL": null,
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z",
+    "likes": [],
+    "isSticky": true
+  }
+]
