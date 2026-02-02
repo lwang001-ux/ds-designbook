@@ -2,8 +2,13 @@
 
 import { useState, useEffect, useCallback } from 'react';
 
+// Candy Apple Red color
+const CANDY_RED = '#FF2D55';
+const CANDY_RED_DARK = '#E6002E';
+const CANDY_RED_LIGHT = '#FF6B8A';
+
 // Flip Clock Digit Component
-const FlipDigit = ({ digit, prevDigit, isFlipping }: { digit: string; prevDigit: string; isFlipping: boolean }) => {
+const FlipDigit = ({ digit }: { digit: string }) => {
   return (
     <div style={{
       position: 'relative',
@@ -16,21 +21,22 @@ const FlipDigit = ({ digit, prevDigit, isFlipping }: { digit: string; prevDigit:
         position: 'relative',
         width: '100%',
         height: '100%',
-        background: '#1a1a1a',
-        borderRadius: 8,
-        boxShadow: '0 4px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)',
+        background: CANDY_RED,
+        borderRadius: 12,
+        boxShadow: '0 6px 20px rgba(255, 45, 85, 0.4), inset 0 2px 0 rgba(255,255,255,0.3)',
         overflow: 'hidden',
       }}>
-        {/* Top half - static showing current digit */}
+        {/* Top half */}
         <div style={{
           position: 'absolute',
           top: 0,
           left: 0,
           right: 0,
           height: '50%',
-          background: 'linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 100%)',
+          background: `linear-gradient(180deg, ${CANDY_RED_LIGHT} 0%, ${CANDY_RED} 100%)`,
           overflow: 'hidden',
-          borderBottom: '2px solid #0a0a0a',
+          borderBottom: '3px solid',
+          borderBottomColor: CANDY_RED_DARK,
           display: 'flex',
           alignItems: 'flex-end',
           justifyContent: 'center',
@@ -39,23 +45,23 @@ const FlipDigit = ({ digit, prevDigit, isFlipping }: { digit: string; prevDigit:
             fontSize: 120,
             fontFamily: "'Courier New', monospace",
             fontWeight: 700,
-            color: '#f0f0e8',
+            color: '#FFFFFF',
             lineHeight: 1,
             transform: 'translateY(50%)',
-            textShadow: '0 2px 4px rgba(0,0,0,0.3)',
+            textShadow: '0 2px 4px rgba(0,0,0,0.2)',
           }}>
             {digit}
           </span>
         </div>
 
-        {/* Bottom half - static showing current digit */}
+        {/* Bottom half */}
         <div style={{
           position: 'absolute',
           bottom: 0,
           left: 0,
           right: 0,
           height: '50%',
-          background: 'linear-gradient(180deg, #1a1a1a 0%, #151515 100%)',
+          background: `linear-gradient(180deg, ${CANDY_RED} 0%, ${CANDY_RED_DARK} 100%)`,
           overflow: 'hidden',
           display: 'flex',
           alignItems: 'flex-start',
@@ -65,10 +71,10 @@ const FlipDigit = ({ digit, prevDigit, isFlipping }: { digit: string; prevDigit:
             fontSize: 120,
             fontFamily: "'Courier New', monospace",
             fontWeight: 700,
-            color: '#e8e8e0',
+            color: '#FFFFFF',
             lineHeight: 1,
             transform: 'translateY(-50%)',
-            textShadow: '0 -1px 2px rgba(0,0,0,0.5)',
+            textShadow: '0 -1px 2px rgba(0,0,0,0.2)',
           }}>
             {digit}
           </span>
@@ -80,10 +86,21 @@ const FlipDigit = ({ digit, prevDigit, isFlipping }: { digit: string; prevDigit:
           top: '50%',
           left: 0,
           right: 0,
-          height: 2,
-          background: '#0a0a0a',
+          height: 3,
+          background: CANDY_RED_DARK,
           transform: 'translateY(-50%)',
-          boxShadow: '0 1px 0 rgba(255,255,255,0.05)',
+        }} />
+
+        {/* Glossy reflection */}
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: '30%',
+          background: 'linear-gradient(180deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 100%)',
+          borderRadius: '12px 12px 0 0',
+          pointerEvents: 'none',
         }} />
 
         {/* Side notches */}
@@ -92,8 +109,8 @@ const FlipDigit = ({ digit, prevDigit, isFlipping }: { digit: string; prevDigit:
           top: '50%',
           left: -4,
           width: 8,
-          height: 12,
-          background: '#0a0a0a',
+          height: 14,
+          background: CANDY_RED_DARK,
           borderRadius: '0 6px 6px 0',
           transform: 'translateY(-50%)',
         }} />
@@ -102,24 +119,12 @@ const FlipDigit = ({ digit, prevDigit, isFlipping }: { digit: string; prevDigit:
           top: '50%',
           right: -4,
           width: 8,
-          height: 12,
-          background: '#0a0a0a',
+          height: 14,
+          background: CANDY_RED_DARK,
           borderRadius: '6px 0 0 6px',
           transform: 'translateY(-50%)',
         }} />
       </div>
-
-      {/* Inner shadow overlay for depth */}
-      <div style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        borderRadius: 8,
-        boxShadow: 'inset 0 0 20px rgba(0,0,0,0.3)',
-        pointerEvents: 'none',
-      }} />
     </div>
   );
 };
@@ -147,9 +152,9 @@ export default function CritiqueTimerPage() {
   ];
 
   const phaseColors = {
-    warm: { accent: '#FFE500', label: 'WARM FEEDBACK', icon: '☀️' },
-    cool: { accent: '#00D4FF', label: 'COOL FEEDBACK', icon: '❄️' },
-    open: { accent: '#EC008C', label: 'OPEN CRITIQUE', icon: '💬' },
+    warm: { accent: '#FFB800', label: 'WARM FEEDBACK', icon: '☀️' },
+    cool: { accent: '#00B8D4', label: 'COOL FEEDBACK', icon: '❄️' },
+    open: { accent: CANDY_RED, label: 'OPEN CRITIQUE', icon: '💬' },
   };
 
   const currentPhase = phaseColors[phase];
@@ -270,7 +275,7 @@ export default function CritiqueTimerPage() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(180deg, #2d2d2d 0%, #1a1a1a 50%, #0d0d0d 100%)',
+      background: '#FFFFFF',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
@@ -278,7 +283,7 @@ export default function CritiqueTimerPage() {
       fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
       padding: 20,
     }}>
-      {/* Phase indicator - LED style */}
+      {/* Phase indicator - pill style */}
       <div style={{
         position: 'absolute',
         top: 24,
@@ -286,26 +291,19 @@ export default function CritiqueTimerPage() {
         transform: 'translateX(-50%)',
         display: 'flex',
         alignItems: 'center',
-        gap: 12,
+        gap: 10,
         padding: '10px 24px',
-        background: 'rgba(0,0,0,0.5)',
+        background: currentPhase.accent,
         borderRadius: 30,
-        border: '1px solid #333',
+        boxShadow: `0 4px 15px ${currentPhase.accent}44`,
       }}>
-        <div style={{
-          width: 12,
-          height: 12,
-          borderRadius: '50%',
-          background: currentPhase.accent,
-          boxShadow: `0 0 10px ${currentPhase.accent}, 0 0 20px ${currentPhase.accent}`,
-        }} />
         <span style={{
           fontSize: 13,
-          fontWeight: 600,
-          color: '#e0e0e0',
+          fontWeight: 700,
+          color: '#FFFFFF',
           letterSpacing: 2,
         }}>
-          {currentPhase.label}
+          {currentPhase.icon} {currentPhase.label}
         </span>
       </div>
 
@@ -319,16 +317,16 @@ export default function CritiqueTimerPage() {
           width: 44,
           height: 44,
           borderRadius: '50%',
-          background: '#2a2a2a',
-          border: '1px solid #444',
+          background: '#FFFFFF',
+          border: '2px solid #E8E8E8',
           cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
         }}
       >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="1.5">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={CANDY_RED} strokeWidth="1.5">
           <circle cx="12" cy="12" r="3"/>
           <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
         </svg>
@@ -352,8 +350,8 @@ export default function CritiqueTimerPage() {
               width: 36,
               height: 36,
               borderRadius: '50%',
-              background: '#2a2a2a',
-              border: '1px solid #444',
+              background: '#FFFFFF',
+              border: `2px solid ${CANDY_RED}`,
               cursor: currentStudent === 1 ? 'not-allowed' : 'pointer',
               opacity: currentStudent === 1 ? 0.5 : 1,
               display: 'flex',
@@ -361,11 +359,11 @@ export default function CritiqueTimerPage() {
               justifyContent: 'center',
             }}
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={CANDY_RED} strokeWidth="2">
               <polyline points="15 18 9 12 15 6"/>
             </svg>
           </button>
-          <span style={{ fontSize: 16, fontWeight: 600, color: '#e0e0e0' }}>
+          <span style={{ fontSize: 16, fontWeight: 600, color: '#1a1f3c' }}>
             Student {currentStudent} of {totalStudents}
           </span>
           <button
@@ -375,8 +373,8 @@ export default function CritiqueTimerPage() {
               width: 36,
               height: 36,
               borderRadius: '50%',
-              background: '#2a2a2a',
-              border: '1px solid #444',
+              background: '#FFFFFF',
+              border: `2px solid ${CANDY_RED}`,
               cursor: currentStudent === totalStudents ? 'not-allowed' : 'pointer',
               opacity: currentStudent === totalStudents ? 0.5 : 1,
               display: 'flex',
@@ -384,7 +382,7 @@ export default function CritiqueTimerPage() {
               justifyContent: 'center',
             }}
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={CANDY_RED} strokeWidth="2">
               <polyline points="9 18 15 12 9 6"/>
             </svg>
           </button>
@@ -393,14 +391,12 @@ export default function CritiqueTimerPage() {
 
       {/* Main flip clock display */}
       <div style={{
-        background: 'linear-gradient(180deg, #3a3a3a 0%, #1a1a1a 10%, #0a0a0a 100%)',
+        background: '#FFFFFF',
         padding: '30px 40px',
-        borderRadius: 20,
-        boxShadow: '0 20px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1)',
-        border: '1px solid #333',
-        marginBottom: 40,
+        borderRadius: 24,
+        boxShadow: '0 10px 40px rgba(255, 45, 85, 0.15)',
+        marginBottom: 50,
       }}>
-        {/* Wood grain base accent */}
         <div style={{
           position: 'relative',
         }}>
@@ -408,11 +404,11 @@ export default function CritiqueTimerPage() {
           {isUrgent && !isComplete && (
             <div style={{
               position: 'absolute',
-              top: -20,
-              left: -20,
-              right: -20,
-              bottom: -20,
-              background: 'radial-gradient(ellipse at center, rgba(231, 76, 60, 0.2) 0%, transparent 70%)',
+              top: -30,
+              left: -30,
+              right: -30,
+              bottom: -30,
+              background: 'radial-gradient(ellipse at center, rgba(255, 45, 85, 0.15) 0%, transparent 70%)',
               animation: 'urgentPulse 1s ease-in-out infinite',
               pointerEvents: 'none',
             }} />
@@ -424,8 +420,8 @@ export default function CritiqueTimerPage() {
             gap: 16,
           }}>
             {/* Minutes */}
-            <FlipDigit digit={minTens} prevDigit={prevMinTens} isFlipping={minTens !== prevMinTens} />
-            <FlipDigit digit={minOnes} prevDigit={prevMinOnes} isFlipping={minOnes !== prevMinOnes} />
+            <FlipDigit digit={minTens} />
+            <FlipDigit digit={minOnes} />
 
             {/* Colon separator */}
             <div style={{
@@ -435,81 +431,82 @@ export default function CritiqueTimerPage() {
               padding: '0 8px',
             }}>
               <div style={{
-                width: 16,
-                height: 16,
+                width: 18,
+                height: 18,
                 borderRadius: '50%',
-                background: isRunning ? currentPhase.accent : '#444',
-                boxShadow: isRunning ? `0 0 10px ${currentPhase.accent}` : 'none',
+                background: CANDY_RED,
+                boxShadow: isRunning ? `0 0 15px ${CANDY_RED}` : 'none',
                 transition: 'all 0.3s ease',
+                animation: isRunning ? 'colonPulse 1s infinite' : 'none',
               }} />
               <div style={{
-                width: 16,
-                height: 16,
+                width: 18,
+                height: 18,
                 borderRadius: '50%',
-                background: isRunning ? currentPhase.accent : '#444',
-                boxShadow: isRunning ? `0 0 10px ${currentPhase.accent}` : 'none',
+                background: CANDY_RED,
+                boxShadow: isRunning ? `0 0 15px ${CANDY_RED}` : 'none',
                 transition: 'all 0.3s ease',
+                animation: isRunning ? 'colonPulse 1s infinite' : 'none',
               }} />
             </div>
 
             {/* Seconds */}
-            <FlipDigit digit={secTens} prevDigit={prevSecTens} isFlipping={secTens !== prevSecTens} />
-            <FlipDigit digit={secOnes} prevDigit={prevSecOnes} isFlipping={secOnes !== prevSecOnes} />
+            <FlipDigit digit={secTens} />
+            <FlipDigit digit={secOnes} />
           </div>
 
           {/* Status messages */}
           {isUrgent && !isComplete && (
             <div style={{
               position: 'absolute',
-              bottom: -40,
+              bottom: -45,
               left: '50%',
               transform: 'translateX(-50%)',
               fontSize: 14,
               fontWeight: 700,
-              color: '#E74C3C',
+              color: CANDY_RED,
               letterSpacing: 3,
               animation: 'blink 1s infinite',
             }}>
-              ⚠ WRAPPING UP
+              WRAPPING UP
             </div>
           )}
 
           {isComplete && (
             <div style={{
               position: 'absolute',
-              bottom: -40,
+              bottom: -45,
               left: '50%',
               transform: 'translateX(-50%)',
-              fontSize: 16,
+              fontSize: 18,
               fontWeight: 700,
-              color: currentPhase.accent,
+              color: CANDY_RED,
               letterSpacing: 3,
-              textShadow: `0 0 10px ${currentPhase.accent}`,
             }}>
-              ✓ TIME'S UP!
+              TIME'S UP!
             </div>
           )}
         </div>
       </div>
 
-      {/* Controls - retro button style */}
+      {/* Controls */}
       <div style={{ display: 'flex', gap: 16, marginBottom: 30 }}>
         {!isRunning ? (
           <button
             onClick={startTimer}
             style={{
               padding: '16px 48px',
-              background: `linear-gradient(180deg, ${currentPhase.accent} 0%, ${currentPhase.accent}dd 100%)`,
+              background: CANDY_RED,
               border: 'none',
-              borderRadius: 8,
-              color: '#000',
+              borderRadius: 30,
+              color: '#FFFFFF',
               fontSize: 16,
               fontWeight: 700,
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               gap: 10,
-              boxShadow: `0 4px 15px ${currentPhase.accent}66`,
+              boxShadow: `0 6px 20px ${CANDY_RED}44`,
               letterSpacing: 2,
             }}
           >
@@ -523,10 +520,10 @@ export default function CritiqueTimerPage() {
             onClick={pauseTimer}
             style={{
               padding: '16px 48px',
-              background: 'linear-gradient(180deg, #444 0%, #333 100%)',
-              border: `2px solid ${currentPhase.accent}`,
-              borderRadius: 8,
-              color: '#fff',
+              background: '#FFFFFF',
+              border: `3px solid ${CANDY_RED}`,
+              borderRadius: 30,
+              color: CANDY_RED,
               fontSize: 16,
               fontWeight: 700,
               cursor: 'pointer',
@@ -547,9 +544,9 @@ export default function CritiqueTimerPage() {
           onClick={resetTimer}
           style={{
             padding: '16px 32px',
-            background: 'linear-gradient(180deg, #333 0%, #222 100%)',
-            border: '1px solid #444',
-            borderRadius: 8,
+            background: '#FFFFFF',
+            border: '2px solid #E8E8E8',
+            borderRadius: 30,
             color: '#888',
             fontSize: 16,
             fontWeight: 600,
@@ -561,14 +558,13 @@ export default function CritiqueTimerPage() {
         </button>
       </div>
 
-      {/* Phase selector - toggle switch style */}
+      {/* Phase selector */}
       <div style={{
         display: 'flex',
         gap: 8,
         padding: 6,
-        background: '#1a1a1a',
+        background: '#F5F5F5',
         borderRadius: 30,
-        border: '1px solid #333',
       }}>
         {(['warm', 'cool', 'open'] as const).map(p => (
           <button
@@ -576,18 +572,17 @@ export default function CritiqueTimerPage() {
             onClick={() => setPhase(p)}
             style={{
               padding: '10px 24px',
-              background: phase === p
-                ? `linear-gradient(180deg, ${phaseColors[p].accent} 0%, ${phaseColors[p].accent}cc 100%)`
-                : 'transparent',
+              background: phase === p ? phaseColors[p].accent : 'transparent',
               border: 'none',
               borderRadius: 24,
-              color: phase === p ? '#000' : '#666',
+              color: phase === p ? '#FFFFFF' : '#888',
               fontSize: 12,
               fontWeight: 700,
               cursor: 'pointer',
               textTransform: 'uppercase',
               letterSpacing: 1,
               transition: 'all 0.2s ease',
+              boxShadow: phase === p ? `0 4px 12px ${phaseColors[p].accent}44` : 'none',
             }}
           >
             {phaseColors[p].icon} {p}
@@ -602,14 +597,14 @@ export default function CritiqueTimerPage() {
           bottom: 0,
           left: 0,
           right: 0,
-          background: 'linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 100%)',
-          borderTop: '1px solid #444',
+          background: '#FFFFFF',
+          borderTop: '1px solid #E8E8E8',
           padding: '24px 40px',
-          boxShadow: '0 -10px 40px rgba(0,0,0,0.5)',
+          boxShadow: '0 -10px 40px rgba(0,0,0,0.1)',
         }}>
           <div style={{ maxWidth: 600, margin: '0 auto' }}>
             <div style={{ marginBottom: 20 }}>
-              <label style={{ fontSize: 11, fontWeight: 600, color: '#666', display: 'block', marginBottom: 10, letterSpacing: 2 }}>
+              <label style={{ fontSize: 11, fontWeight: 600, color: '#888', display: 'block', marginBottom: 10, letterSpacing: 2 }}>
                 TIME PRESETS
               </label>
               <div style={{ display: 'flex', gap: 8 }}>
@@ -619,15 +614,14 @@ export default function CritiqueTimerPage() {
                     onClick={() => setPresetTime(preset.seconds)}
                     style={{
                       padding: '10px 18px',
-                      background: totalTime === preset.seconds
-                        ? `linear-gradient(180deg, ${currentPhase.accent} 0%, ${currentPhase.accent}cc 100%)`
-                        : '#333',
-                      border: totalTime === preset.seconds ? 'none' : '1px solid #444',
-                      borderRadius: 6,
-                      color: totalTime === preset.seconds ? '#000' : '#888',
+                      background: totalTime === preset.seconds ? CANDY_RED : '#FFFFFF',
+                      border: totalTime === preset.seconds ? 'none' : '2px solid #E8E8E8',
+                      borderRadius: 20,
+                      color: totalTime === preset.seconds ? '#FFFFFF' : '#666',
                       fontSize: 13,
                       fontWeight: 600,
                       cursor: 'pointer',
+                      boxShadow: totalTime === preset.seconds ? `0 4px 12px ${CANDY_RED}44` : 'none',
                     }}
                   >
                     {preset.label}
@@ -637,7 +631,7 @@ export default function CritiqueTimerPage() {
             </div>
 
             <div>
-              <label style={{ fontSize: 11, fontWeight: 600, color: '#666', display: 'block', marginBottom: 10, letterSpacing: 2 }}>
+              <label style={{ fontSize: 11, fontWeight: 600, color: '#888', display: 'block', marginBottom: 10, letterSpacing: 2 }}>
                 STUDENTS (GALLERY WALK)
               </label>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -646,11 +640,11 @@ export default function CritiqueTimerPage() {
                   style={{
                     width: 40,
                     height: 40,
-                    borderRadius: 6,
-                    background: '#333',
-                    border: '1px solid #444',
+                    borderRadius: '50%',
+                    background: '#FFFFFF',
+                    border: `2px solid ${CANDY_RED}`,
                     fontSize: 20,
-                    color: '#888',
+                    color: CANDY_RED,
                     cursor: 'pointer',
                   }}
                 >
@@ -659,7 +653,7 @@ export default function CritiqueTimerPage() {
                 <span style={{
                   fontSize: 28,
                   fontWeight: 700,
-                  color: '#e0e0e0',
+                  color: CANDY_RED,
                   minWidth: 50,
                   textAlign: 'center',
                   fontFamily: "'Courier New', monospace",
@@ -671,17 +665,17 @@ export default function CritiqueTimerPage() {
                   style={{
                     width: 40,
                     height: 40,
-                    borderRadius: 6,
-                    background: '#333',
-                    border: '1px solid #444',
+                    borderRadius: '50%',
+                    background: '#FFFFFF',
+                    border: `2px solid ${CANDY_RED}`,
                     fontSize: 20,
-                    color: '#888',
+                    color: CANDY_RED,
                     cursor: 'pointer',
                   }}
                 >
                   +
                 </button>
-                <span style={{ fontSize: 12, color: '#666', marginLeft: 12 }}>
+                <span style={{ fontSize: 12, color: '#888', marginLeft: 12 }}>
                   Total: {totalStudents * Math.ceil(totalTime / 60)} min
                 </span>
               </div>
@@ -698,6 +692,10 @@ export default function CritiqueTimerPage() {
         @keyframes urgentPulse {
           0%, 100% { opacity: 0.5; }
           50% { opacity: 1; }
+        }
+        @keyframes colonPulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.5; }
         }
       `}</style>
     </div>
