@@ -2856,6 +2856,7 @@ export default function HomePage() {
   const [showAvatarEditor, setShowAvatarEditor] = useState(false);
   const [showIBFormatter, setShowIBFormatter] = useState(false);
   const [showRubricBuilder, setShowRubricBuilder] = useState(false);
+  const [showResourceLibrary, setShowResourceLibrary] = useState(false);
   const [myAvatar, setMyAvatar] = useState<AvatarConfig>({ style: 'block', hair: 'short', accessory: 'none', color: 'cyan' });
   const [draggingId, setDraggingId] = useState<number | null>(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
@@ -3249,23 +3250,125 @@ export default function HomePage() {
               </button>
 
               {/* Resource Library */}
-              <button style={{
-                width: '100%',
-                padding: '8px 10px',
-                background: '#FFFFFF',
-                border: '1px solid #E8E8E8',
-                borderRadius: 10,
-                color: '#1a1f3c',
-                fontSize: 10,
-                fontWeight: 500,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-              }}>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1a1f3c" strokeWidth="1.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-                Resource Library
-              </button>
+              <div>
+                <button
+                  onClick={() => setShowResourceLibrary(!showResourceLibrary)}
+                  style={{
+                    width: '100%',
+                    padding: '8px 10px',
+                    background: showResourceLibrary ? '#F5F5F5' : '#FFFFFF',
+                    border: '1px solid #E8E8E8',
+                    borderRadius: showResourceLibrary ? '10px 10px 0 0' : 10,
+                    color: '#1a1f3c',
+                    fontSize: 10,
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                  }}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1a1f3c" strokeWidth="1.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                  Resource Library
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2" style={{ marginLeft: 'auto', transform: showResourceLibrary ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}><polyline points="6 9 12 15 18 9"/></svg>
+                </button>
+                {showResourceLibrary && (
+                  <div style={{
+                    background: '#F9F9F9',
+                    border: '1px solid #E8E8E8',
+                    borderTop: 'none',
+                    borderRadius: '0 0 10px 10px',
+                    padding: 8,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 6,
+                  }}>
+                    <a
+                      href="https://unspool.work"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        padding: '6px 8px',
+                        background: '#FFFFFF',
+                        border: '1px solid #00D4FF',
+                        borderRadius: 6,
+                        color: '#1a1f3c',
+                        fontSize: 9,
+                        fontWeight: 500,
+                        textDecoration: 'none',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 6,
+                      }}
+                    >
+                      <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#00D4FF' }} />
+                      Unspool
+                    </a>
+                    <a
+                      href="https://toolsforschools.work"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        padding: '6px 8px',
+                        background: '#FFFFFF',
+                        border: '1px solid #EC008C',
+                        borderRadius: 6,
+                        color: '#1a1f3c',
+                        fontSize: 9,
+                        fontWeight: 500,
+                        textDecoration: 'none',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 6,
+                      }}
+                    >
+                      <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#EC008C' }} />
+                      Tools for Schools
+                    </a>
+                    <a
+                      href="https://filegenerator.work"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        padding: '6px 8px',
+                        background: '#FFFFFF',
+                        border: '1px solid #FFE500',
+                        borderRadius: 6,
+                        color: '#1a1f3c',
+                        fontSize: 9,
+                        fontWeight: 500,
+                        textDecoration: 'none',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 6,
+                      }}
+                    >
+                      <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#FFE500' }} />
+                      File Generator
+                    </a>
+                    <a
+                      href="https://csf2030.work"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        padding: '6px 8px',
+                        background: '#FFFFFF',
+                        border: '1px solid #1a1f3c',
+                        borderRadius: 6,
+                        color: '#1a1f3c',
+                        fontSize: 9,
+                        fontWeight: 500,
+                        textDecoration: 'none',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 6,
+                      }}
+                    >
+                      <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#1a1f3c' }} />
+                      CSF 2030
+                    </a>
+                  </div>
+                )}
+              </div>
 
               <div style={{ borderTop: '1px solid #E8E8E8', margin: '8px 0' }} />
 
