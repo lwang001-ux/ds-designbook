@@ -755,6 +755,40 @@ export default function TimerPage() {
           transition: 'background 0.3s',
         }}>
           <div style={{ maxWidth: 600, margin: '0 auto' }}>
+            {/* Close Knob */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'center',
+              marginBottom: 20,
+            }}>
+              <button
+                onClick={() => setShowSettings(false)}
+                style={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: '50%',
+                  background: themeColors.knobBg,
+                  border: 'none',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: isDark
+                    ? `0 4px 8px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.1), inset 0 -2px 4px rgba(0,0,0,0.2)`
+                    : `0 4px 8px rgba(0,0,0,0.1), inset 0 2px 4px rgba(255,255,255,0.5), inset 0 -2px 4px rgba(0,0,0,0.05)`,
+                  transition: 'transform 0.1s',
+                }}
+                onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.95)'}
+                onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={themeColors.textMuted} strokeWidth="2.5" strokeLinecap="round">
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
+
             {/* Theme Toggle */}
             <div style={{ marginBottom: 20 }}>
               <label style={{
