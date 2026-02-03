@@ -3136,9 +3136,120 @@ export default function HomePage() {
 
           {/* Teacher Tools */}
           <div style={{ marginTop: 'auto' }}>
-            <h3 style={{ fontSize: 11, fontWeight: 600, color: COLORS.textMuted, margin: '0 0 12px', letterSpacing: 0.5, textTransform: 'uppercase' }}>
+            <h3 style={{ fontSize: 11, fontWeight: 600, color: COLORS.textMuted, margin: '0 0 16px', letterSpacing: 0.5, textTransform: 'uppercase' }}>
               Teacher Tools
             </h3>
+            {/* CMYK Knobs Row */}
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginBottom: 16 }}>
+              {/* Cyan - Timer */}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                <button
+                  onClick={() => window.open('/timer', 'ClassroomTimer', 'width=800,height=700,menubar=no,toolbar=no,location=no,status=no')}
+                  style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: '50%',
+                    background: '#00FFFF',
+                    border: 'none',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 3px 8px rgba(0,255,255,0.3), inset 0 2px 4px rgba(255,255,255,0.3)',
+                    transition: 'transform 0.1s',
+                  }}
+                  onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.95)'}
+                  onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                  onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                  title="Timer"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </button>
+                <span style={{ fontSize: 8, color: COLORS.textMuted, fontWeight: 500 }}>Timer</span>
+              </div>
+
+              {/* Magenta - Photos */}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                <button
+                  onClick={() => window.open('/photos', 'Photos', 'width=900,height=700,menubar=no,toolbar=no,location=no,status=no')}
+                  style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: '50%',
+                    background: '#FF00FF',
+                    border: 'none',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 3px 8px rgba(255,0,255,0.3), inset 0 2px 4px rgba(255,255,255,0.3)',
+                    transition: 'transform 0.1s',
+                  }}
+                  onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.95)'}
+                  onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                  onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                  title="Photos & Videos"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                </button>
+                <span style={{ fontSize: 8, color: COLORS.textMuted, fontWeight: 500 }}>Photos</span>
+              </div>
+
+              {/* Yellow - Picker */}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                <button
+                  onClick={() => window.open('/picker', 'RandomPicker', 'width=900,height=700,menubar=no,toolbar=no,location=no,status=no')}
+                  style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: '50%',
+                    background: '#FFFF00',
+                    border: 'none',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 3px 8px rgba(255,255,0,0.3), inset 0 2px 4px rgba(255,255,255,0.3)',
+                    transition: 'transform 0.1s',
+                  }}
+                  onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.95)'}
+                  onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                  onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                  title="Random Picker"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>
+                </button>
+                <span style={{ fontSize: 8, color: COLORS.textMuted, fontWeight: 500 }}>Picker</span>
+              </div>
+
+              {/* Key (Black) - Rubric */}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                <button
+                  onClick={() => setShowRubricBuilder(true)}
+                  style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: '50%',
+                    background: '#1a1f3c',
+                    border: 'none',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 3px 8px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.1)',
+                    transition: 'transform 0.1s',
+                  }}
+                  onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.95)'}
+                  onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                  onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                  title="Rubric Builder"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFF" strokeWidth="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                </button>
+                <span style={{ fontSize: 8, color: COLORS.textMuted, fontWeight: 500 }}>Rubric</span>
+              </div>
+            </div>
+
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               {/* Add Post-it */}
               <button style={{
@@ -3178,75 +3289,6 @@ export default function HomePage() {
               }}>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#EC008C" strokeWidth="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
                 IB Lesson Formatter
-              </button>
-
-              {/* Timer - Opens in new window */}
-              <button
-                onClick={() => window.open('/timer', 'ClassroomTimer', 'width=800,height=700,menubar=no,toolbar=no,location=no,status=no')}
-                style={{
-                width: '100%',
-                padding: '8px 10px',
-                background: '#FFFFFF',
-                border: '1px solid #FFE500',
-                borderRadius: 10,
-                color: '#1a1f3c',
-                fontSize: 10,
-                fontWeight: 500,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-              }}>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FFE500" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                Timer
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="1.5" style={{ marginLeft: 'auto' }}>
-                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
-                </svg>
-              </button>
-
-              {/* Random Student Picker - Opens in new window */}
-              <button
-                onClick={() => window.open('/picker', 'RandomPicker', 'width=900,height=700,menubar=no,toolbar=no,location=no,status=no')}
-                style={{
-                width: '100%',
-                padding: '8px 10px',
-                background: '#FFFFFF',
-                border: '1px solid #00D4FF',
-                borderRadius: 10,
-                color: '#1a1f3c',
-                fontSize: 10,
-                fontWeight: 500,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-              }}>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00D4FF" strokeWidth="1.5"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>
-                Random Picker
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="1.5" style={{ marginLeft: 'auto' }}>
-                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
-                </svg>
-              </button>
-
-              {/* Rubric Builder */}
-              <button
-                onClick={() => setShowRubricBuilder(true)}
-                style={{
-                width: '100%',
-                padding: '8px 10px',
-                background: '#FFFFFF',
-                border: '1px solid #EC008C',
-                borderRadius: 10,
-                color: '#1a1f3c',
-                fontSize: 10,
-                fontWeight: 500,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-              }}>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#EC008C" strokeWidth="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-                Rubric Builder
               </button>
 
               {/* Resource Library */}
