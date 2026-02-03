@@ -3180,9 +3180,9 @@ export default function HomePage() {
                 IB Lesson Formatter
               </button>
 
-              {/* Critique Timer - Opens in new window */}
+              {/* Timer - Opens in new window */}
               <button
-                onClick={() => window.open('/timer', 'CritiqueTimer', 'width=800,height=700,menubar=no,toolbar=no,location=no,status=no')}
+                onClick={() => window.open('/timer', 'ClassroomTimer', 'width=800,height=700,menubar=no,toolbar=no,location=no,status=no')}
                 style={{
                 width: '100%',
                 padding: '8px 10px',
@@ -3198,7 +3198,7 @@ export default function HomePage() {
                 gap: 8,
               }}>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FFE500" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                Critique Timer
+                Timer
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="1.5" style={{ marginLeft: 'auto' }}>
                   <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
                 </svg>

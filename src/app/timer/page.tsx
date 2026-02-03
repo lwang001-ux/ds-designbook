@@ -138,6 +138,10 @@ export default function TimerPage() {
     { label: '3', seconds: 180 },
     { label: '5', seconds: 300 },
     { label: '10', seconds: 600 },
+    { label: '50', seconds: 3000 },
+    { label: '55', seconds: 3300 },
+    { label: '60', seconds: 3600 },
+    { label: '70', seconds: 4200 },
   ];
 
   const playAlert = useCallback(() => {
