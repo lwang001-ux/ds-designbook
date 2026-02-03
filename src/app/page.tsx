@@ -3304,7 +3304,7 @@ export default function HomePage() {
                       Unspool
                     </a>
                     <a
-                      href="https://toolsforschools.work"
+                      href="https://toolsforschools-v2.vercel.app/"
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{
