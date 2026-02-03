@@ -3325,7 +3325,7 @@ export default function HomePage() {
                       Tools for Schools
                     </a>
                     <a
-                      href="https://filegenerator.work"
+                      href="https://filegenerator-eight.vercel.app"
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{
