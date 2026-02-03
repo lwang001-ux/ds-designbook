@@ -2,32 +2,29 @@
 
 import { useState, useEffect, useCallback } from 'react';
 
-// Itten's color wheel - pure, flat colors inspired by "The Art of Color"
+// Dieter Rams / Braun inspired color palette
 const COLOR_OPTIONS = [
-  { name: 'Red', color: '#E4002B' },      // Itten primary red
-  { name: 'Yellow', color: '#FFD300' },   // Itten primary yellow
-  { name: 'Blue', color: '#0057B8' },     // Itten primary blue
-  { name: 'Orange', color: '#FF6900' },   // Itten secondary orange
-  { name: 'Green', color: '#00843D' },    // Itten secondary green
-  { name: 'Violet', color: '#6B3FA0' },   // Itten secondary violet
-  { name: 'Black', color: '#000000' },    // Pure black
+  { name: 'Braun Black', color: '#1a1a1a' },
+  { name: 'Braun Green', color: '#4A7C59' },    // Classic Braun green
+  { name: 'Braun Orange', color: '#E86A33' },   // Braun accent orange
+  { name: 'Snow White', color: '#F5F5F5' },
+  { name: 'Warm Grey', color: '#8B8680' },
 ];
 
-// Flip Clock Digit Component - Bauhaus-inspired flat design
-const FlipDigit = ({ digit, color }: { digit: string; color: string }) => {
+// Flip Clock Digit - Braun/Rams inspired
+const FlipDigit = ({ digit, color, isLight }: { digit: string; color: string; isLight: boolean }) => {
   return (
     <div style={{
       position: 'relative',
-      width: 100,
-      height: 140,
+      width: 90,
+      height: 130,
     }}>
-      {/* Card - solid color, no gradients */}
       <div style={{
         position: 'relative',
         width: '100%',
         height: '100%',
         background: color,
-        borderRadius: 8,
+        borderRadius: 6,
         overflow: 'hidden',
       }}>
         {/* Top half */}
@@ -39,16 +36,16 @@ const FlipDigit = ({ digit, color }: { digit: string; color: string }) => {
           height: '50%',
           background: color,
           overflow: 'hidden',
-          borderBottom: '3px solid rgba(0,0,0,0.3)',
+          borderBottom: `2px solid ${isLight ? 'rgba(0,0,0,0.1)' : 'rgba(0,0,0,0.3)'}`,
           display: 'flex',
           alignItems: 'flex-end',
           justifyContent: 'center',
         }}>
           <span style={{
-            fontSize: 120,
-            fontFamily: "'Courier New', monospace",
-            fontWeight: 700,
-            color: '#FFFFFF',
+            fontSize: 100,
+            fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+            fontWeight: 300,
+            color: isLight ? '#1a1a1a' : '#FFFFFF',
             lineHeight: 1,
             transform: 'translateY(50%)',
           }}>
@@ -70,10 +67,10 @@ const FlipDigit = ({ digit, color }: { digit: string; color: string }) => {
           justifyContent: 'center',
         }}>
           <span style={{
-            fontSize: 120,
-            fontFamily: "'Courier New', monospace",
-            fontWeight: 700,
-            color: '#FFFFFF',
+            fontSize: 100,
+            fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+            fontWeight: 300,
+            color: isLight ? '#1a1a1a' : '#FFFFFF',
             lineHeight: 1,
             transform: 'translateY(-50%)',
           }}>
@@ -81,36 +78,14 @@ const FlipDigit = ({ digit, color }: { digit: string; color: string }) => {
           </span>
         </div>
 
-        {/* Center divider line */}
+        {/* Center divider */}
         <div style={{
           position: 'absolute',
           top: '50%',
           left: 0,
           right: 0,
-          height: 3,
-          background: 'rgba(0,0,0,0.3)',
-          transform: 'translateY(-50%)',
-        }} />
-
-        {/* Side notches */}
-        <div style={{
-          position: 'absolute',
-          top: '50%',
-          left: -3,
-          width: 6,
-          height: 12,
-          background: '#FFFFFF',
-          borderRadius: '0 4px 4px 0',
-          transform: 'translateY(-50%)',
-        }} />
-        <div style={{
-          position: 'absolute',
-          top: '50%',
-          right: -3,
-          width: 6,
-          height: 12,
-          background: '#FFFFFF',
-          borderRadius: '4px 0 0 4px',
+          height: 2,
+          background: isLight ? 'rgba(0,0,0,0.1)' : 'rgba(0,0,0,0.3)',
           transform: 'translateY(-50%)',
         }} />
       </div>
@@ -118,7 +93,44 @@ const FlipDigit = ({ digit, color }: { digit: string; color: string }) => {
   );
 };
 
-// Classroom Timer - Itten/Bauhaus inspired
+// Braun-style circular button
+const BraunButton = ({
+  onClick,
+  active,
+  children,
+  color = '#1a1a1a',
+  size = 50
+}: {
+  onClick: () => void;
+  active?: boolean;
+  children: React.ReactNode;
+  color?: string;
+  size?: number;
+}) => (
+  <button
+    onClick={onClick}
+    style={{
+      width: size,
+      height: size,
+      borderRadius: '50%',
+      background: active ? color : '#FFFFFF',
+      border: `2px solid ${color}`,
+      color: active ? '#FFFFFF' : color,
+      fontSize: size > 40 ? 14 : 11,
+      fontWeight: 500,
+      fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+      cursor: 'pointer',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      transition: 'all 0.15s ease',
+    }}
+  >
+    {children}
+  </button>
+);
+
+// Timer - Dieter Rams / Braun Design
 export default function TimerPage() {
   const [minutes, setMinutes] = useState(5);
   const [seconds, setSeconds] = useState(0);
@@ -131,6 +143,7 @@ export default function TimerPage() {
   const [selectedColor, setSelectedColor] = useState(0);
 
   const currentColor = COLOR_OPTIONS[selectedColor].color;
+  const isLightColor = selectedColor === 3; // Snow White
 
   const presets = [
     { label: '1', seconds: 60 },
@@ -156,15 +169,15 @@ export default function TimerPage() {
       oscillator.connect(gainNode);
       gainNode.connect(audioContext.destination);
 
-      oscillator.frequency.value = 800;
+      oscillator.frequency.value = 660;
       oscillator.type = 'sine';
-      gainNode.gain.value = 0.3;
+      gainNode.gain.value = 0.2;
 
       oscillator.start();
       setTimeout(() => {
         oscillator.stop();
         audioContext.close();
-      }, 500);
+      }, 400);
     } catch (e) {
       console.log('Audio not supported');
     }
@@ -247,7 +260,7 @@ export default function TimerPage() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: '#FFFFFF',
+      background: '#F8F7F5', // Warm off-white like Braun products
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
@@ -255,222 +268,217 @@ export default function TimerPage() {
       fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
       padding: 20,
     }}>
-      {/* Title - Bauhaus typography */}
+      {/* Braun-inspired product housing */}
       <div style={{
-        position: 'absolute',
-        top: 30,
-        left: '50%',
-        transform: 'translateX(-50%)',
-        fontSize: 14,
-        fontWeight: 700,
-        color: '#000000',
-        letterSpacing: 6,
-        textTransform: 'uppercase',
+        background: '#FFFFFF',
+        borderRadius: 20,
+        padding: '40px 50px',
+        boxShadow: '0 2px 20px rgba(0,0,0,0.08)',
+        position: 'relative',
       }}>
-        Timer
-      </div>
-
-      {/* Settings toggle */}
-      <button
-        onClick={() => setShowSettings(!showSettings)}
-        style={{
-          position: 'absolute',
-          top: 24,
-          right: 24,
-          width: 40,
-          height: 40,
-          borderRadius: 0,
-          background: '#000000',
-          border: 'none',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2">
-          <circle cx="12" cy="12" r="3"/>
-          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-        </svg>
-      </button>
-
-      {/* Student counter */}
-      {totalStudents > 1 && (
+        {/* Braun logo area - minimal text */}
         <div style={{
           position: 'absolute',
-          top: 70,
-          left: '50%',
-          transform: 'translateX(-50%)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 20,
+          top: 16,
+          left: 24,
+          fontSize: 10,
+          fontWeight: 500,
+          color: '#999',
+          letterSpacing: 3,
+          textTransform: 'uppercase',
         }}>
-          <button
-            onClick={prevStudent}
-            disabled={currentStudent === 1}
-            style={{
-              width: 32,
-              height: 32,
-              background: currentStudent === 1 ? '#CCCCCC' : '#000000',
-              border: 'none',
-              cursor: currentStudent === 1 ? 'not-allowed' : 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2">
-              <polyline points="15 18 9 12 15 6"/>
-            </svg>
-          </button>
-          <span style={{
-            fontSize: 14,
-            fontWeight: 700,
-            color: '#000000',
-            letterSpacing: 2,
-          }}>
-            {currentStudent} / {totalStudents}
-          </span>
-          <button
-            onClick={nextStudent}
-            disabled={currentStudent === totalStudents}
-            style={{
-              width: 32,
-              height: 32,
-              background: currentStudent === totalStudents ? '#CCCCCC' : '#000000',
-              border: 'none',
-              cursor: currentStudent === totalStudents ? 'not-allowed' : 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2">
-              <polyline points="9 18 15 12 9 6"/>
-            </svg>
-          </button>
-        </div>
-      )}
-
-      {/* Main flip clock display */}
-      <div style={{
-        marginBottom: 60,
-      }}>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 12,
-        }}>
-          {/* Minutes */}
-          <FlipDigit digit={minTens} color={currentColor} />
-          <FlipDigit digit={minOnes} color={currentColor} />
-
-          {/* Colon - simple squares */}
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 20,
-            padding: '0 8px',
-          }}>
-            <div style={{
-              width: 16,
-              height: 16,
-              background: currentColor,
-            }} />
-            <div style={{
-              width: 16,
-              height: 16,
-              background: currentColor,
-            }} />
-          </div>
-
-          {/* Seconds */}
-          <FlipDigit digit={secTens} color={currentColor} />
-          <FlipDigit digit={secOnes} color={currentColor} />
+          Timer
         </div>
 
-        {/* Status messages */}
-        {isUrgent && (
-          <div style={{
-            textAlign: 'center',
-            marginTop: 30,
-            fontSize: 14,
-            fontWeight: 700,
-            color: currentColor,
-            letterSpacing: 4,
-            animation: 'blink 1s infinite',
-          }}>
-            ALMOST DONE
-          </div>
-        )}
-
-        {isComplete && (
-          <div style={{
-            textAlign: 'center',
-            marginTop: 30,
-            fontSize: 18,
-            fontWeight: 700,
-            color: currentColor,
-            letterSpacing: 4,
-          }}>
-            TIME
-          </div>
-        )}
-      </div>
-
-      {/* Controls - geometric Bauhaus buttons */}
-      <div style={{ display: 'flex', gap: 12 }}>
-        {!isRunning ? (
-          <button
-            onClick={startTimer}
-            style={{
-              padding: '16px 50px',
-              background: currentColor,
-              border: 'none',
-              color: '#FFFFFF',
-              fontSize: 14,
-              fontWeight: 700,
-              cursor: 'pointer',
-              letterSpacing: 4,
-            }}
-          >
-            START
-          </button>
-        ) : (
-          <button
-            onClick={pauseTimer}
-            style={{
-              padding: '16px 50px',
-              background: '#FFFFFF',
-              border: `3px solid ${currentColor}`,
-              color: currentColor,
-              fontSize: 14,
-              fontWeight: 700,
-              cursor: 'pointer',
-              letterSpacing: 4,
-            }}
-          >
-            PAUSE
-          </button>
-        )}
+        {/* Settings button - Braun style */}
         <button
-          onClick={resetTimer}
+          onClick={() => setShowSettings(!showSettings)}
           style={{
-            padding: '16px 30px',
-            background: '#FFFFFF',
-            border: '3px solid #000000',
-            color: '#000000',
-            fontSize: 14,
-            fontWeight: 700,
+            position: 'absolute',
+            top: 12,
+            right: 16,
+            width: 32,
+            height: 32,
+            borderRadius: '50%',
+            background: showSettings ? '#1a1a1a' : '#FFFFFF',
+            border: '1px solid #E0E0E0',
             cursor: 'pointer',
-            letterSpacing: 4,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
         >
-          RESET
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={showSettings ? '#FFFFFF' : '#666'} strokeWidth="1.5">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+          </svg>
         </button>
+
+        {/* Student counter */}
+        {totalStudents > 1 && (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 16,
+            marginBottom: 20,
+            marginTop: 10,
+          }}>
+            <button
+              onClick={prevStudent}
+              disabled={currentStudent === 1}
+              style={{
+                width: 28,
+                height: 28,
+                borderRadius: '50%',
+                background: currentStudent === 1 ? '#E8E8E8' : '#1a1a1a',
+                border: 'none',
+                cursor: currentStudent === 1 ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2">
+                <polyline points="15 18 9 12 15 6"/>
+              </svg>
+            </button>
+            <span style={{
+              fontSize: 12,
+              fontWeight: 500,
+              color: '#666',
+              letterSpacing: 1,
+            }}>
+              {currentStudent} of {totalStudents}
+            </span>
+            <button
+              onClick={nextStudent}
+              disabled={currentStudent === totalStudents}
+              style={{
+                width: 28,
+                height: 28,
+                borderRadius: '50%',
+                background: currentStudent === totalStudents ? '#E8E8E8' : '#1a1a1a',
+                border: 'none',
+                cursor: currentStudent === totalStudents ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </button>
+          </div>
+        )}
+
+        {/* Clock display */}
+        <div style={{ marginBottom: 30 }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+          }}>
+            <FlipDigit digit={minTens} color={currentColor} isLight={isLightColor} />
+            <FlipDigit digit={minOnes} color={currentColor} isLight={isLightColor} />
+
+            {/* Colon - Braun style dots */}
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 16,
+              padding: '0 6px',
+            }}>
+              <div style={{
+                width: 10,
+                height: 10,
+                borderRadius: '50%',
+                background: currentColor,
+              }} />
+              <div style={{
+                width: 10,
+                height: 10,
+                borderRadius: '50%',
+                background: currentColor,
+              }} />
+            </div>
+
+            <FlipDigit digit={secTens} color={currentColor} isLight={isLightColor} />
+            <FlipDigit digit={secOnes} color={currentColor} isLight={isLightColor} />
+          </div>
+
+          {/* Status */}
+          {isUrgent && (
+            <div style={{
+              textAlign: 'center',
+              marginTop: 20,
+              fontSize: 11,
+              fontWeight: 500,
+              color: '#E86A33',
+              letterSpacing: 2,
+              animation: 'pulse 1s infinite',
+            }}>
+              FINISHING
+            </div>
+          )}
+
+          {isComplete && (
+            <div style={{
+              textAlign: 'center',
+              marginTop: 20,
+              fontSize: 12,
+              fontWeight: 500,
+              color: currentColor,
+              letterSpacing: 2,
+            }}>
+              COMPLETE
+            </div>
+          )}
+        </div>
+
+        {/* Controls - Braun calculator style */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          gap: 12,
+        }}>
+          {!isRunning ? (
+            <BraunButton onClick={startTimer} active color="#4A7C59" size={56}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="5 3 19 12 5 21 5 3"/>
+              </svg>
+            </BraunButton>
+          ) : (
+            <BraunButton onClick={pauseTimer} color="#E86A33" size={56}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <rect x="6" y="4" width="4" height="16"/>
+                <rect x="14" y="4" width="4" height="16"/>
+              </svg>
+            </BraunButton>
+          )}
+          <BraunButton onClick={resetTimer} size={56}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+              <path d="M3 3v5h5"/>
+            </svg>
+          </BraunButton>
+        </div>
+
+        {/* Dieter Rams quote - subtle */}
+        <div style={{
+          marginTop: 24,
+          textAlign: 'center',
+          fontSize: 9,
+          color: '#BBB',
+          fontStyle: 'italic',
+          letterSpacing: 0.5,
+        }}>
+          "Less, but better"
+        </div>
       </div>
 
-      {/* Settings panel */}
+      {/* Settings panel - Braun control panel style */}
       {showSettings && (
         <div style={{
           position: 'fixed',
@@ -478,67 +486,64 @@ export default function TimerPage() {
           left: 0,
           right: 0,
           background: '#FFFFFF',
-          borderTop: '3px solid #000000',
-          padding: '30px 40px',
+          borderTop: '1px solid #E8E8E8',
+          padding: '24px 30px',
         }}>
-          <div style={{ maxWidth: 500, margin: '0 auto' }}>
-            {/* Time Presets */}
-            <div style={{ marginBottom: 30 }}>
+          <div style={{ maxWidth: 600, margin: '0 auto' }}>
+            {/* Time Presets - Grid of circular buttons like Braun calculator */}
+            <div style={{ marginBottom: 24 }}>
               <label style={{
-                fontSize: 10,
-                fontWeight: 700,
-                color: '#000000',
+                fontSize: 9,
+                fontWeight: 500,
+                color: '#999',
                 display: 'block',
                 marginBottom: 12,
-                letterSpacing: 3,
+                letterSpacing: 2,
+                textTransform: 'uppercase',
               }}>
-                MINUTES
+                Minutes
               </label>
-              <div style={{ display: 'flex', gap: 8 }}>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                 {presets.map(preset => (
-                  <button
+                  <BraunButton
                     key={preset.seconds}
                     onClick={() => setPresetTime(preset.seconds)}
-                    style={{
-                      width: 50,
-                      height: 50,
-                      background: totalTime === preset.seconds ? currentColor : '#FFFFFF',
-                      border: totalTime === preset.seconds ? 'none' : '2px solid #000000',
-                      color: totalTime === preset.seconds ? '#FFFFFF' : '#000000',
-                      fontSize: 16,
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                    }}
+                    active={totalTime === preset.seconds}
+                    color={currentColor}
+                    size={44}
                   >
                     {preset.label}
-                  </button>
+                  </BraunButton>
                 ))}
               </div>
             </div>
 
-            {/* Clock Color - Itten color wheel */}
-            <div style={{ marginBottom: 30 }}>
+            {/* Color Selection */}
+            <div style={{ marginBottom: 24 }}>
               <label style={{
-                fontSize: 10,
-                fontWeight: 700,
-                color: '#000000',
+                fontSize: 9,
+                fontWeight: 500,
+                color: '#999',
                 display: 'block',
                 marginBottom: 12,
-                letterSpacing: 3,
+                letterSpacing: 2,
+                textTransform: 'uppercase',
               }}>
-                COLOR
+                Color
               </label>
-              <div style={{ display: 'flex', gap: 8 }}>
+              <div style={{ display: 'flex', gap: 10 }}>
                 {COLOR_OPTIONS.map((option, index) => (
                   <button
                     key={option.name}
                     onClick={() => setSelectedColor(index)}
                     style={{
-                      width: 40,
-                      height: 40,
+                      width: 36,
+                      height: 36,
+                      borderRadius: '50%',
                       background: option.color,
-                      border: selectedColor === index ? '3px solid #000000' : 'none',
+                      border: selectedColor === index ? '3px solid #1a1a1a' : '2px solid #E8E8E8',
                       cursor: 'pointer',
+                      outline: selectedColor === index && option.color === '#F5F5F5' ? '1px solid #CCC' : 'none',
                     }}
                     title={option.name}
                   />
@@ -549,61 +554,43 @@ export default function TimerPage() {
             {/* Student Counter */}
             <div>
               <label style={{
-                fontSize: 10,
-                fontWeight: 700,
-                color: '#000000',
+                fontSize: 9,
+                fontWeight: 500,
+                color: '#999',
                 display: 'block',
                 marginBottom: 12,
-                letterSpacing: 3,
+                letterSpacing: 2,
+                textTransform: 'uppercase',
               }}>
-                STUDENTS
+                Students
               </label>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <button
+                <BraunButton
                   onClick={() => setTotalStudents(Math.max(1, totalStudents - 1))}
-                  style={{
-                    width: 40,
-                    height: 40,
-                    background: '#FFFFFF',
-                    border: '2px solid #000000',
-                    fontSize: 20,
-                    fontWeight: 700,
-                    color: '#000000',
-                    cursor: 'pointer',
-                  }}
+                  size={36}
                 >
                   −
-                </button>
+                </BraunButton>
                 <span style={{
-                  fontSize: 24,
-                  fontWeight: 700,
-                  color: '#000000',
-                  minWidth: 40,
+                  fontSize: 20,
+                  fontWeight: 300,
+                  color: '#1a1a1a',
+                  minWidth: 36,
                   textAlign: 'center',
                 }}>
                   {totalStudents}
                 </span>
-                <button
+                <BraunButton
                   onClick={() => setTotalStudents(totalStudents + 1)}
-                  style={{
-                    width: 40,
-                    height: 40,
-                    background: '#FFFFFF',
-                    border: '2px solid #000000',
-                    fontSize: 20,
-                    fontWeight: 700,
-                    color: '#000000',
-                    cursor: 'pointer',
-                  }}
+                  size={36}
                 >
                   +
-                </button>
+                </BraunButton>
                 {totalStudents > 1 && (
                   <span style={{
-                    fontSize: 12,
-                    color: '#666666',
-                    marginLeft: 12,
-                    letterSpacing: 1,
+                    fontSize: 11,
+                    color: '#999',
+                    marginLeft: 8,
                   }}>
                     {totalStudents * Math.ceil(totalTime / 60)} min total
                   </span>
@@ -615,9 +602,9 @@ export default function TimerPage() {
       )}
 
       <style jsx global>{`
-        @keyframes blink {
+        @keyframes pulse {
           0%, 100% { opacity: 1; }
-          50% { opacity: 0.3; }
+          50% { opacity: 0.5; }
         }
       `}</style>
     </div>
