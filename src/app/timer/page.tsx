@@ -2,18 +2,77 @@
 
 import { useState, useEffect, useCallback } from 'react';
 
-// Fresh color palette
-const COLOR_OPTIONS = [
-  { name: 'Midnight', color: '#2D3047' },
-  { name: 'Coral', color: '#E85D75' },
-  { name: 'Teal', color: '#1B998B' },
-  { name: 'Saffron', color: '#F4A024' },
-  { name: 'Lavender', color: '#7B6D8D' },
-  { name: 'Sky', color: '#4ECDC4' },
-];
+// Color palettes for teachers to choose from
+const COLOR_PALETTES = {
+  RGB: {
+    name: 'RGB',
+    colors: [
+      { name: 'Red', color: '#FF0000' },
+      { name: 'Green', color: '#00FF00' },
+      { name: 'Blue', color: '#0000FF' },
+      { name: 'White', color: '#FFFFFF' },
+      { name: 'Black', color: '#000000' },
+    ],
+  },
+  CMYK: {
+    name: 'CMYK',
+    colors: [
+      { name: 'Cyan', color: '#00FFFF' },
+      { name: 'Magenta', color: '#FF00FF' },
+      { name: 'Yellow', color: '#FFFF00' },
+      { name: 'Key (Black)', color: '#000000' },
+    ],
+  },
+  NEON: {
+    name: 'NEON',
+    colors: [
+      { name: 'Electric Pink', color: '#FF10F0' },
+      { name: 'Neon Green', color: '#39FF14' },
+      { name: 'Electric Blue', color: '#7DF9FF' },
+      { name: 'Neon Orange', color: '#FF6600' },
+      { name: 'Neon Yellow', color: '#DFFF00' },
+      { name: 'Neon Purple', color: '#BC13FE' },
+    ],
+  },
+  ROYGBV: {
+    name: 'ROYGBV',
+    colors: [
+      { name: 'Red', color: '#FF0000' },
+      { name: 'Orange', color: '#FF7F00' },
+      { name: 'Yellow', color: '#FFFF00' },
+      { name: 'Green', color: '#00FF00' },
+      { name: 'Blue', color: '#0000FF' },
+      { name: 'Violet', color: '#8B00FF' },
+    ],
+  },
+  PASTEL: {
+    name: 'Pastel',
+    colors: [
+      { name: 'Blush', color: '#FFB6C1' },
+      { name: 'Peach', color: '#FFDAB9' },
+      { name: 'Mint', color: '#98FB98' },
+      { name: 'Sky', color: '#87CEEB' },
+      { name: 'Lavender', color: '#E6E6FA' },
+      { name: 'Lemon', color: '#FFFACD' },
+    ],
+  },
+};
+
+type PaletteKey = keyof typeof COLOR_PALETTES;
+
+// Helper to determine if a color is light (needs dark text)
+const isLightColor = (hexColor: string): boolean => {
+  const hex = hexColor.replace('#', '');
+  const r = parseInt(hex.substr(0, 2), 16);
+  const g = parseInt(hex.substr(2, 2), 16);
+  const b = parseInt(hex.substr(4, 2), 16);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.6;
+};
 
 // Flip Clock Digit
 const FlipDigit = ({ digit, color }: { digit: string; color: string }) => {
+  const textColor = isLightColor(color) ? '#2D3047' : '#FFFFFF';
   return (
     <div style={{
       position: 'relative',
@@ -46,7 +105,7 @@ const FlipDigit = ({ digit, color }: { digit: string; color: string }) => {
             fontSize: 90,
             fontFamily: "Helvetica, Arial, sans-serif",
             fontWeight: 700,
-            color: '#FFFFFF',
+            color: textColor,
             lineHeight: 1,
             transform: 'translateY(50%)',
           }}>
@@ -71,7 +130,7 @@ const FlipDigit = ({ digit, color }: { digit: string; color: string }) => {
             fontSize: 90,
             fontFamily: "Helvetica, Arial, sans-serif",
             fontWeight: 700,
-            color: '#FFFFFF',
+            color: textColor,
             lineHeight: 1,
             transform: 'translateY(-50%)',
           }}>
@@ -126,9 +185,19 @@ export default function TimerPage() {
   const [totalStudents, setTotalStudents] = useState(1);
   const [showSettings, setShowSettings] = useState(true);
   const [alertPlayed, setAlertPlayed] = useState(false);
-  const [selectedColor, setSelectedColor] = useState(2); // Teal default
+  const [selectedPalette, setSelectedPalette] = useState<PaletteKey>('NEON');
+  const [selectedColor, setSelectedColor] = useState(0);
 
-  const currentColor = COLOR_OPTIONS[selectedColor].color;
+  const currentPalette = COLOR_PALETTES[selectedPalette];
+  const currentColor = currentPalette.colors[Math.min(selectedColor, currentPalette.colors.length - 1)].color;
+
+  // Reset color index when palette changes if out of bounds
+  const handlePaletteChange = (palette: PaletteKey) => {
+    setSelectedPalette(palette);
+    if (selectedColor >= COLOR_PALETTES[palette].colors.length) {
+      setSelectedColor(0);
+    }
+  };
 
   const presets = [
     { label: '1', seconds: 60 },
@@ -610,6 +679,44 @@ export default function TimerPage() {
               </div>
             </div>
 
+            {/* Palette Selection */}
+            <div style={{ marginBottom: 20 }}>
+              <label style={{
+                fontSize: 10,
+                fontWeight: 700,
+                color: '#999',
+                display: 'block',
+                marginBottom: 10,
+                letterSpacing: 1,
+                textTransform: 'uppercase',
+              }}>
+                Palette
+              </label>
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                {(Object.keys(COLOR_PALETTES) as PaletteKey[]).map((key) => (
+                  <button
+                    key={key}
+                    onClick={() => handlePaletteChange(key)}
+                    style={{
+                      padding: '8px 14px',
+                      borderRadius: 10,
+                      background: selectedPalette === key ? currentColor : '#F5F5F0',
+                      border: 'none',
+                      color: selectedPalette === key ? '#FFFFFF' : '#666',
+                      fontSize: 11,
+                      fontWeight: 600,
+                      fontFamily: "Helvetica, Arial, sans-serif",
+                      cursor: 'pointer',
+                      transition: 'all 0.15s',
+                      letterSpacing: 0.5,
+                    }}
+                  >
+                    {COLOR_PALETTES[key].name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Color Selection */}
             <div style={{ marginBottom: 20 }}>
               <label style={{
@@ -623,8 +730,8 @@ export default function TimerPage() {
               }}>
                 Color
               </label>
-              <div style={{ display: 'flex', gap: 8 }}>
-                {COLOR_OPTIONS.map((option, index) => (
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                {currentPalette.colors.map((option, index) => (
                   <button
                     key={option.name}
                     onClick={() => setSelectedColor(index)}
@@ -633,9 +740,10 @@ export default function TimerPage() {
                       height: 36,
                       borderRadius: 8,
                       background: option.color,
-                      border: selectedColor === index ? '3px solid #2D3047' : 'none',
+                      border: selectedColor === index ? '3px solid #2D3047' : option.color === '#FFFFFF' || option.color === '#FFFF00' || option.color === '#FFFACD' ? '1px solid #DDD' : 'none',
                       cursor: 'pointer',
                       transition: 'transform 0.1s',
+                      boxShadow: option.color === '#000000' && selectedColor === index ? 'inset 0 0 0 2px #FFF' : 'none',
                     }}
                     title={option.name}
                   />
