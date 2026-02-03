@@ -2997,9 +2997,125 @@ export default function HomePage() {
             {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </span>
 
-          <div style={{ display: 'flex', gap: 6 }}>
-            <Knob size={26} active={viewMode === 'pins'} onClick={() => setViewMode('pins')} label="PINS" />
-            <Knob size={26} active={viewMode === 'list'} onClick={() => setViewMode('list')} label="LIST" />
+          {/* CMYK Accent Knobs */}
+          <div style={{ display: 'flex', gap: 8 }}>
+            {/* Cyan - Pins */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
+              <button
+                onClick={() => setViewMode('pins')}
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: '50%',
+                  background: '#FFFFFF',
+                  border: viewMode === 'pins' ? '2px solid #00FFFF' : '1px solid #E8E8E8',
+                  cursor: 'pointer',
+                  position: 'relative',
+                  transition: 'all 0.15s ease',
+                  boxShadow: viewMode === 'pins' ? '0 0 8px rgba(0,255,255,0.3)' : 'none',
+                }}
+              >
+                <div style={{
+                  position: 'absolute',
+                  top: 4,
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: 2,
+                  height: 6,
+                  background: viewMode === 'pins' ? '#00FFFF' : '#CCC',
+                  borderRadius: 1,
+                }} />
+              </button>
+              <span style={{ fontSize: 7, color: viewMode === 'pins' ? '#00CCCC' : '#888', fontWeight: 600, letterSpacing: 0.5 }}>PINS</span>
+            </div>
+
+            {/* Magenta - Photos */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
+              <button
+                onClick={() => window.open('/photos', 'Photos', 'width=900,height=700,menubar=no,toolbar=no,location=no,status=no')}
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: '50%',
+                  background: '#FFFFFF',
+                  border: '1px solid #FF00FF',
+                  cursor: 'pointer',
+                  position: 'relative',
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                <div style={{
+                  position: 'absolute',
+                  top: 4,
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: 2,
+                  height: 6,
+                  background: '#FF00FF',
+                  borderRadius: 1,
+                }} />
+              </button>
+              <span style={{ fontSize: 7, color: '#CC00CC', fontWeight: 600, letterSpacing: 0.5 }}>PHOTO</span>
+            </div>
+
+            {/* Yellow - List */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
+              <button
+                onClick={() => setViewMode('list')}
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: '50%',
+                  background: '#FFFFFF',
+                  border: viewMode === 'list' ? '2px solid #FFD700' : '1px solid #E8E8E8',
+                  cursor: 'pointer',
+                  position: 'relative',
+                  transition: 'all 0.15s ease',
+                  boxShadow: viewMode === 'list' ? '0 0 8px rgba(255,215,0,0.3)' : 'none',
+                }}
+              >
+                <div style={{
+                  position: 'absolute',
+                  top: 4,
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: 2,
+                  height: 6,
+                  background: viewMode === 'list' ? '#FFD700' : '#CCC',
+                  borderRadius: 1,
+                }} />
+              </button>
+              <span style={{ fontSize: 7, color: viewMode === 'list' ? '#CCB000' : '#888', fontWeight: 600, letterSpacing: 0.5 }}>LIST</span>
+            </div>
+
+            {/* Key - Timer */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
+              <button
+                onClick={() => window.open('/timer', 'Timer', 'width=800,height=700,menubar=no,toolbar=no,location=no,status=no')}
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: '50%',
+                  background: '#FFFFFF',
+                  border: '1px solid #1a1f3c',
+                  cursor: 'pointer',
+                  position: 'relative',
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                <div style={{
+                  position: 'absolute',
+                  top: 4,
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: 2,
+                  height: 6,
+                  background: '#1a1f3c',
+                  borderRadius: 1,
+                }} />
+              </button>
+              <span style={{ fontSize: 7, color: '#1a1f3c', fontWeight: 600, letterSpacing: 0.5 }}>TIME</span>
+            </div>
           </div>
 
           {/* Notifications */}
