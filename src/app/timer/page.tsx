@@ -156,6 +156,34 @@ const FlipDigit = ({ digit, color }: { digit: string; color: string }) => {
   );
 };
 
+// Theme colors
+const THEMES = {
+  dark: {
+    bg: '#1a1a1a',
+    clockBg: '#2a2a2a',
+    displayBg: '#1a1a1a',
+    knobBg: '#2a2a2a',
+    knobInactive: '#3a3a3a',
+    text: '#FFFFFF',
+    textMuted: '#666',
+    border: '#3a3a3a',
+    dot: '#1a1a1a',
+  },
+  light: {
+    bg: '#F5F5F0',
+    clockBg: '#FFFFFF',
+    displayBg: '#F0F0EB',
+    knobBg: '#E8E8E3',
+    knobInactive: '#E0E0DB',
+    text: '#1a1a1a',
+    textMuted: '#888',
+    border: '#E0E0DB',
+    dot: '#D8D8D3',
+  },
+};
+
+type ThemeKey = keyof typeof THEMES;
+
 // Knob Component
 const Knob = ({
   onClick,
@@ -164,6 +192,7 @@ const Knob = ({
   size = 72,
   label,
   active = false,
+  theme,
 }: {
   onClick: () => void;
   icon: React.ReactNode;
@@ -171,7 +200,11 @@ const Knob = ({
   size?: number;
   label: string;
   active?: boolean;
+  theme: ThemeKey;
 }) => {
+  const themeColors = THEMES[theme];
+  const isDark = theme === 'dark';
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
       <button
@@ -180,47 +213,26 @@ const Knob = ({
           width: size,
           height: size,
           borderRadius: '50%',
-          background: active ? color : '#2a2a2a',
+          background: active ? color : themeColors.knobBg,
           border: 'none',
           cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           position: 'relative',
-          boxShadow: `
-            0 4px 8px rgba(0,0,0,0.3),
-            0 2px 4px rgba(0,0,0,0.2),
-            inset 0 2px 4px rgba(255,255,255,0.1),
-            inset 0 -2px 4px rgba(0,0,0,0.2)
-          `,
+          boxShadow: isDark
+            ? `0 4px 8px rgba(0,0,0,0.3), 0 2px 4px rgba(0,0,0,0.2), inset 0 2px 4px rgba(255,255,255,0.1), inset 0 -2px 4px rgba(0,0,0,0.2)`
+            : `0 4px 8px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.08), inset 0 2px 4px rgba(255,255,255,0.5), inset 0 -2px 4px rgba(0,0,0,0.05)`,
           transition: 'transform 0.1s, box-shadow 0.1s',
         }}
         onMouseDown={(e) => {
           e.currentTarget.style.transform = 'scale(0.95) translateY(2px)';
-          e.currentTarget.style.boxShadow = `
-            0 2px 4px rgba(0,0,0,0.3),
-            0 1px 2px rgba(0,0,0,0.2),
-            inset 0 2px 4px rgba(255,255,255,0.1),
-            inset 0 -2px 4px rgba(0,0,0,0.2)
-          `;
         }}
         onMouseUp={(e) => {
           e.currentTarget.style.transform = 'scale(1) translateY(0)';
-          e.currentTarget.style.boxShadow = `
-            0 4px 8px rgba(0,0,0,0.3),
-            0 2px 4px rgba(0,0,0,0.2),
-            inset 0 2px 4px rgba(255,255,255,0.1),
-            inset 0 -2px 4px rgba(0,0,0,0.2)
-          `;
         }}
         onMouseLeave={(e) => {
           e.currentTarget.style.transform = 'scale(1) translateY(0)';
-          e.currentTarget.style.boxShadow = `
-            0 4px 8px rgba(0,0,0,0.3),
-            0 2px 4px rgba(0,0,0,0.2),
-            inset 0 2px 4px rgba(255,255,255,0.1),
-            inset 0 -2px 4px rgba(0,0,0,0.2)
-          `;
         }}
       >
         {/* Knob indicator notch */}
@@ -231,7 +243,7 @@ const Knob = ({
           transform: 'translateX(-50%)',
           width: 3,
           height: 8,
-          background: active ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.3)',
+          background: active ? 'rgba(255,255,255,0.8)' : (isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.2)'),
           borderRadius: 2,
         }} />
         {icon}
@@ -239,7 +251,7 @@ const Knob = ({
       <span style={{
         fontSize: 10,
         fontWeight: 600,
-        color: '#666',
+        color: themeColors.textMuted,
         letterSpacing: 1,
         textTransform: 'uppercase',
       }}>
@@ -255,12 +267,17 @@ const SmallKnob = ({
   children,
   active = false,
   color,
+  theme,
 }: {
   onClick: () => void;
   children: React.ReactNode;
   active?: boolean;
   color: string;
+  theme: ThemeKey;
 }) => {
+  const themeColors = THEMES[theme];
+  const isDark = theme === 'dark';
+
   return (
     <button
       onClick={onClick}
@@ -268,19 +285,19 @@ const SmallKnob = ({
         width: 44,
         height: 44,
         borderRadius: '50%',
-        background: active ? color : '#3a3a3a',
+        background: active ? color : themeColors.knobInactive,
         border: 'none',
         cursor: 'pointer',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        color: '#FFFFFF',
+        color: active ? '#FFFFFF' : themeColors.text,
         fontSize: 13,
         fontWeight: 600,
         fontFamily: "Helvetica, Arial, sans-serif",
-        boxShadow: active
-          ? `0 3px 6px rgba(0,0,0,0.3), inset 0 1px 2px rgba(255,255,255,0.2)`
-          : `0 3px 6px rgba(0,0,0,0.2), inset 0 1px 2px rgba(255,255,255,0.1)`,
+        boxShadow: isDark
+          ? (active ? `0 3px 6px rgba(0,0,0,0.3), inset 0 1px 2px rgba(255,255,255,0.2)` : `0 3px 6px rgba(0,0,0,0.2), inset 0 1px 2px rgba(255,255,255,0.1)`)
+          : (active ? `0 3px 6px rgba(0,0,0,0.15), inset 0 1px 2px rgba(255,255,255,0.3)` : `0 2px 4px rgba(0,0,0,0.08), inset 0 1px 2px rgba(255,255,255,0.5)`),
         transition: 'all 0.15s',
       }}
     >
@@ -301,9 +318,12 @@ export default function TimerPage() {
   const [alertPlayed, setAlertPlayed] = useState(false);
   const [selectedPalette, setSelectedPalette] = useState<PaletteKey>('NEON');
   const [selectedColor, setSelectedColor] = useState(0);
+  const [theme, setTheme] = useState<ThemeKey>('dark');
 
   const currentPalette = COLOR_PALETTES[selectedPalette];
   const currentColor = currentPalette.colors[Math.min(selectedColor, currentPalette.colors.length - 1)].color;
+  const themeColors = THEMES[theme];
+  const isDark = theme === 'dark';
 
   const handlePaletteChange = (palette: PaletteKey) => {
     setSelectedPalette(palette);
@@ -427,25 +447,25 @@ export default function TimerPage() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: '#1a1a1a',
+      background: themeColors.bg,
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
       fontFamily: "Helvetica, Arial, sans-serif",
       padding: 20,
+      transition: 'background 0.3s',
     }}>
       {/* Clock Device */}
       <div style={{
-        background: '#2a2a2a',
+        background: themeColors.clockBg,
         borderRadius: 32,
         padding: '40px 48px 48px',
         position: 'relative',
-        boxShadow: `
-          0 20px 40px rgba(0,0,0,0.5),
-          0 10px 20px rgba(0,0,0,0.3),
-          inset 0 1px 0 rgba(255,255,255,0.05)
-        `,
+        boxShadow: isDark
+          ? `0 20px 40px rgba(0,0,0,0.5), 0 10px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)`
+          : `0 20px 40px rgba(0,0,0,0.1), 0 10px 20px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.05)`,
+        transition: 'background 0.3s, box-shadow 0.3s',
       }}>
         {/* Speaker grille pattern at top */}
         <div style={{
@@ -459,7 +479,7 @@ export default function TimerPage() {
               width: 4,
               height: 4,
               borderRadius: '50%',
-              background: '#1a1a1a',
+              background: themeColors.dot,
             }} />
           ))}
         </div>
@@ -472,7 +492,7 @@ export default function TimerPage() {
           <span style={{
             fontSize: 10,
             fontWeight: 600,
-            color: '#555',
+            color: themeColors.textMuted,
             letterSpacing: 4,
             textTransform: 'uppercase',
           }}>
@@ -496,7 +516,7 @@ export default function TimerPage() {
                 width: 28,
                 height: 28,
                 borderRadius: '50%',
-                background: currentStudent === 1 ? '#3a3a3a' : currentColor,
+                background: currentStudent === 1 ? themeColors.knobInactive : currentColor,
                 border: 'none',
                 cursor: currentStudent === 1 ? 'not-allowed' : 'pointer',
                 display: 'flex',
@@ -512,7 +532,7 @@ export default function TimerPage() {
             <span style={{
               fontSize: 14,
               fontWeight: 600,
-              color: '#888',
+              color: themeColors.textMuted,
               fontFamily: 'monospace',
             }}>
               {currentStudent} / {totalStudents}
@@ -524,7 +544,7 @@ export default function TimerPage() {
                 width: 28,
                 height: 28,
                 borderRadius: '50%',
-                background: currentStudent === totalStudents ? '#3a3a3a' : currentColor,
+                background: currentStudent === totalStudents ? themeColors.knobInactive : currentColor,
                 border: 'none',
                 cursor: currentStudent === totalStudents ? 'not-allowed' : 'pointer',
                 display: 'flex',
@@ -542,11 +562,11 @@ export default function TimerPage() {
 
         {/* Clock display with recessed look */}
         <div style={{
-          background: '#1a1a1a',
+          background: themeColors.displayBg,
           borderRadius: 16,
           padding: 20,
           marginBottom: 32,
-          boxShadow: 'inset 0 4px 8px rgba(0,0,0,0.4)',
+          boxShadow: isDark ? 'inset 0 4px 8px rgba(0,0,0,0.4)' : 'inset 0 2px 6px rgba(0,0,0,0.1)',
         }}>
           <div style={{
             display: 'flex',
@@ -647,8 +667,9 @@ export default function TimerPage() {
               color={currentColor}
               active={false}
               label="Start"
+              theme={theme}
               icon={
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="#FFFFFF">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill={isDark ? '#FFFFFF' : '#666'}>
                   <polygon points="7 4 19 12 7 20 7 4"/>
                 </svg>
               }
@@ -659,6 +680,7 @@ export default function TimerPage() {
               color={currentColor}
               active={true}
               label="Pause"
+              theme={theme}
               icon={
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="#FFFFFF">
                   <rect x="6" y="4" width="4" height="16" rx="1"/>
@@ -670,11 +692,12 @@ export default function TimerPage() {
 
           <Knob
             onClick={resetTimer}
-            color="#666"
+            color={isDark ? '#666' : '#AAA'}
             active={false}
             label="Reset"
+            theme={theme}
             icon={
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.5">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={isDark ? '#FFFFFF' : '#666'} strokeWidth="2.5">
                 <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
                 <path d="M3 3v5h5"/>
               </svg>
@@ -687,8 +710,9 @@ export default function TimerPage() {
             active={showSettings}
             label="Settings"
             size={56}
+            theme={theme}
             icon={
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={showSettings ? '#FFFFFF' : (isDark ? '#FFFFFF' : '#666')} strokeWidth="2">
                 <circle cx="12" cy="12" r="3"/>
                 <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
               </svg>
@@ -707,13 +731,13 @@ export default function TimerPage() {
             width: 8,
             height: 8,
             borderRadius: '50%',
-            background: '#1a1a1a',
+            background: themeColors.dot,
           }} />
           <div style={{
             width: 8,
             height: 8,
             borderRadius: '50%',
-            background: '#1a1a1a',
+            background: themeColors.dot,
           }} />
         </div>
       </div>
@@ -725,17 +749,63 @@ export default function TimerPage() {
           bottom: 0,
           left: 0,
           right: 0,
-          background: '#2a2a2a',
-          borderTop: '1px solid #3a3a3a',
+          background: themeColors.clockBg,
+          borderTop: `1px solid ${themeColors.border}`,
           padding: '20px 24px 28px',
+          transition: 'background 0.3s',
         }}>
           <div style={{ maxWidth: 600, margin: '0 auto' }}>
+            {/* Theme Toggle */}
+            <div style={{ marginBottom: 20 }}>
+              <label style={{
+                fontSize: 10,
+                fontWeight: 700,
+                color: themeColors.textMuted,
+                display: 'block',
+                marginBottom: 10,
+                letterSpacing: 1,
+                textTransform: 'uppercase',
+              }}>
+                Background
+              </label>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button
+                  onClick={() => setTheme('dark')}
+                  style={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: '50%',
+                    background: '#1a1a1a',
+                    border: theme === 'dark' ? '3px solid ' + currentColor : '2px solid #3a3a3a',
+                    cursor: 'pointer',
+                    boxShadow: theme === 'dark' ? `0 0 0 3px ${currentColor}40` : 'none',
+                    transition: 'all 0.15s',
+                  }}
+                  title="Dark"
+                />
+                <button
+                  onClick={() => setTheme('light')}
+                  style={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: '50%',
+                    background: '#FFFFFF',
+                    border: theme === 'light' ? '3px solid ' + currentColor : '2px solid #DDD',
+                    cursor: 'pointer',
+                    boxShadow: theme === 'light' ? `0 0 0 3px ${currentColor}40` : 'none',
+                    transition: 'all 0.15s',
+                  }}
+                  title="Light"
+                />
+              </div>
+            </div>
+
             {/* Time Presets */}
             <div style={{ marginBottom: 20 }}>
               <label style={{
                 fontSize: 10,
                 fontWeight: 700,
-                color: '#666',
+                color: themeColors.textMuted,
                 display: 'block',
                 marginBottom: 10,
                 letterSpacing: 1,
@@ -750,6 +820,7 @@ export default function TimerPage() {
                     onClick={() => setPresetTime(preset.seconds)}
                     active={totalTime === preset.seconds}
                     color={currentColor}
+                    theme={theme}
                   >
                     {preset.label}
                   </SmallKnob>
@@ -762,7 +833,7 @@ export default function TimerPage() {
               <label style={{
                 fontSize: 10,
                 fontWeight: 700,
-                color: '#666',
+                color: themeColors.textMuted,
                 display: 'block',
                 marginBottom: 10,
                 letterSpacing: 1,
@@ -778,9 +849,9 @@ export default function TimerPage() {
                     style={{
                       padding: '10px 16px',
                       borderRadius: 20,
-                      background: selectedPalette === key ? currentColor : '#3a3a3a',
+                      background: selectedPalette === key ? currentColor : themeColors.knobInactive,
                       border: 'none',
-                      color: '#FFFFFF',
+                      color: selectedPalette === key ? '#FFFFFF' : themeColors.text,
                       fontSize: 11,
                       fontWeight: 600,
                       fontFamily: "Helvetica, Arial, sans-serif",
@@ -800,7 +871,7 @@ export default function TimerPage() {
               <label style={{
                 fontSize: 10,
                 fontWeight: 700,
-                color: '#666',
+                color: themeColors.textMuted,
                 display: 'block',
                 marginBottom: 10,
                 letterSpacing: 1,
@@ -818,7 +889,7 @@ export default function TimerPage() {
                       height: 40,
                       borderRadius: '50%',
                       background: option.color,
-                      border: selectedColor === index ? '3px solid #FFFFFF' : option.color === '#FFFFFF' || option.color === '#FFFF00' || option.color === '#FFFACD' ? '2px solid #555' : '2px solid transparent',
+                      border: selectedColor === index ? `3px solid ${isDark ? '#FFFFFF' : '#333'}` : option.color === '#FFFFFF' || option.color === '#FFFF00' || option.color === '#FFFACD' ? '2px solid #BBB' : '2px solid transparent',
                       cursor: 'pointer',
                       boxShadow: selectedColor === index
                         ? `0 0 0 3px ${option.color}, 0 4px 8px rgba(0,0,0,0.3)`
@@ -836,7 +907,7 @@ export default function TimerPage() {
               <label style={{
                 fontSize: 10,
                 fontWeight: 700,
-                color: '#666',
+                color: themeColors.textMuted,
                 display: 'block',
                 marginBottom: 10,
                 letterSpacing: 1,
@@ -849,13 +920,14 @@ export default function TimerPage() {
                   onClick={() => setTotalStudents(Math.max(1, totalStudents - 1))}
                   active={false}
                   color={currentColor}
+                  theme={theme}
                 >
                   −
                 </SmallKnob>
                 <span style={{
                   fontSize: 24,
                   fontWeight: 600,
-                  color: '#FFFFFF',
+                  color: themeColors.text,
                   minWidth: 40,
                   textAlign: 'center',
                   fontFamily: 'monospace',
@@ -866,13 +938,14 @@ export default function TimerPage() {
                   onClick={() => setTotalStudents(totalStudents + 1)}
                   active={false}
                   color={currentColor}
+                  theme={theme}
                 >
                   +
                 </SmallKnob>
                 {totalStudents > 1 && (
                   <span style={{
                     fontSize: 12,
-                    color: '#666',
+                    color: themeColors.textMuted,
                     marginLeft: 12,
                   }}>
                     {totalStudents * Math.ceil(totalTime / 60)} min total
