@@ -70,22 +70,23 @@ const isLightColor = (hexColor: string): boolean => {
   return luminance > 0.6;
 };
 
-// Flip Clock Digit
+// Flip Clock Digit - larger and more premium
 const FlipDigit = ({ digit, color }: { digit: string; color: string }) => {
-  const textColor = isLightColor(color) ? '#2D3047' : '#FFFFFF';
+  const textColor = isLightColor(color) ? '#1a1a1a' : '#FFFFFF';
   return (
     <div style={{
       position: 'relative',
-      width: 85,
-      height: 120,
+      width: 100,
+      height: 140,
     }}>
       <div style={{
         position: 'relative',
         width: '100%',
         height: '100%',
         background: color,
-        borderRadius: 8,
+        borderRadius: 12,
         overflow: 'hidden',
+        boxShadow: 'inset 0 2px 4px rgba(255,255,255,0.2), inset 0 -2px 4px rgba(0,0,0,0.1)',
       }}>
         {/* Top half */}
         <div style={{
@@ -96,18 +97,19 @@ const FlipDigit = ({ digit, color }: { digit: string; color: string }) => {
           height: '50%',
           background: color,
           overflow: 'hidden',
-          borderBottom: '2px solid rgba(0,0,0,0.2)',
+          borderBottom: '3px solid rgba(0,0,0,0.15)',
           display: 'flex',
           alignItems: 'flex-end',
           justifyContent: 'center',
         }}>
           <span style={{
-            fontSize: 90,
+            fontSize: 110,
             fontFamily: "Helvetica, Arial, sans-serif",
             fontWeight: 700,
             color: textColor,
             lineHeight: 1,
             transform: 'translateY(50%)',
+            textShadow: '0 1px 2px rgba(0,0,0,0.1)',
           }}>
             {digit}
           </span>
@@ -127,51 +129,163 @@ const FlipDigit = ({ digit, color }: { digit: string; color: string }) => {
           justifyContent: 'center',
         }}>
           <span style={{
-            fontSize: 90,
+            fontSize: 110,
             fontFamily: "Helvetica, Arial, sans-serif",
             fontWeight: 700,
             color: textColor,
             lineHeight: 1,
             transform: 'translateY(-50%)',
+            textShadow: '0 1px 2px rgba(0,0,0,0.1)',
           }}>
             {digit}
           </span>
         </div>
 
-        {/* Center divider */}
+        {/* Center divider line */}
         <div style={{
           position: 'absolute',
           top: '50%',
           left: 0,
           right: 0,
-          height: 2,
-          background: 'rgba(0,0,0,0.2)',
-          transform: 'translateY(-50%)',
-        }} />
-
-        {/* Side notches */}
-        <div style={{
-          position: 'absolute',
-          top: '50%',
-          left: -2,
-          width: 4,
-          height: 10,
-          background: '#F5F5F0',
-          borderRadius: '0 2px 2px 0',
-          transform: 'translateY(-50%)',
-        }} />
-        <div style={{
-          position: 'absolute',
-          top: '50%',
-          right: -2,
-          width: 4,
-          height: 10,
-          background: '#F5F5F0',
-          borderRadius: '2px 0 0 2px',
+          height: 3,
+          background: 'rgba(0,0,0,0.15)',
           transform: 'translateY(-50%)',
         }} />
       </div>
     </div>
+  );
+};
+
+// Knob Component
+const Knob = ({
+  onClick,
+  icon,
+  color,
+  size = 72,
+  label,
+  active = false,
+}: {
+  onClick: () => void;
+  icon: React.ReactNode;
+  color: string;
+  size?: number;
+  label: string;
+  active?: boolean;
+}) => {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+      <button
+        onClick={onClick}
+        style={{
+          width: size,
+          height: size,
+          borderRadius: '50%',
+          background: active ? color : '#2a2a2a',
+          border: 'none',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          position: 'relative',
+          boxShadow: `
+            0 4px 8px rgba(0,0,0,0.3),
+            0 2px 4px rgba(0,0,0,0.2),
+            inset 0 2px 4px rgba(255,255,255,0.1),
+            inset 0 -2px 4px rgba(0,0,0,0.2)
+          `,
+          transition: 'transform 0.1s, box-shadow 0.1s',
+        }}
+        onMouseDown={(e) => {
+          e.currentTarget.style.transform = 'scale(0.95) translateY(2px)';
+          e.currentTarget.style.boxShadow = `
+            0 2px 4px rgba(0,0,0,0.3),
+            0 1px 2px rgba(0,0,0,0.2),
+            inset 0 2px 4px rgba(255,255,255,0.1),
+            inset 0 -2px 4px rgba(0,0,0,0.2)
+          `;
+        }}
+        onMouseUp={(e) => {
+          e.currentTarget.style.transform = 'scale(1) translateY(0)';
+          e.currentTarget.style.boxShadow = `
+            0 4px 8px rgba(0,0,0,0.3),
+            0 2px 4px rgba(0,0,0,0.2),
+            inset 0 2px 4px rgba(255,255,255,0.1),
+            inset 0 -2px 4px rgba(0,0,0,0.2)
+          `;
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = 'scale(1) translateY(0)';
+          e.currentTarget.style.boxShadow = `
+            0 4px 8px rgba(0,0,0,0.3),
+            0 2px 4px rgba(0,0,0,0.2),
+            inset 0 2px 4px rgba(255,255,255,0.1),
+            inset 0 -2px 4px rgba(0,0,0,0.2)
+          `;
+        }}
+      >
+        {/* Knob indicator notch */}
+        <div style={{
+          position: 'absolute',
+          top: 6,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: 3,
+          height: 8,
+          background: active ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.3)',
+          borderRadius: 2,
+        }} />
+        {icon}
+      </button>
+      <span style={{
+        fontSize: 10,
+        fontWeight: 600,
+        color: '#666',
+        letterSpacing: 1,
+        textTransform: 'uppercase',
+      }}>
+        {label}
+      </span>
+    </div>
+  );
+};
+
+// Small Knob for settings
+const SmallKnob = ({
+  onClick,
+  children,
+  active = false,
+  color,
+}: {
+  onClick: () => void;
+  children: React.ReactNode;
+  active?: boolean;
+  color: string;
+}) => {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        width: 44,
+        height: 44,
+        borderRadius: '50%',
+        background: active ? color : '#3a3a3a',
+        border: 'none',
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: '#FFFFFF',
+        fontSize: 13,
+        fontWeight: 600,
+        fontFamily: "Helvetica, Arial, sans-serif",
+        boxShadow: active
+          ? `0 3px 6px rgba(0,0,0,0.3), inset 0 1px 2px rgba(255,255,255,0.2)`
+          : `0 3px 6px rgba(0,0,0,0.2), inset 0 1px 2px rgba(255,255,255,0.1)`,
+        transition: 'all 0.15s',
+      }}
+    >
+      {children}
+    </button>
   );
 };
 
@@ -191,7 +305,6 @@ export default function TimerPage() {
   const currentPalette = COLOR_PALETTES[selectedPalette];
   const currentColor = currentPalette.colors[Math.min(selectedColor, currentPalette.colors.length - 1)].color;
 
-  // Reset color index when palette changes if out of bounds
   const handlePaletteChange = (palette: PaletteKey) => {
     setSelectedPalette(palette);
     if (selectedColor >= COLOR_PALETTES[palette].colors.length) {
@@ -216,7 +329,7 @@ export default function TimerPage() {
     setAlertPlayed(true);
 
     try {
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const audioContext = new (window.AudioContext || (window as typeof window & { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
       const oscillator = audioContext.createOscillator();
       const gainNode = audioContext.createGain();
 
@@ -314,7 +427,7 @@ export default function TimerPage() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: '#F5F5F0',
+      background: '#1a1a1a',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
@@ -322,76 +435,49 @@ export default function TimerPage() {
       fontFamily: "Helvetica, Arial, sans-serif",
       padding: 20,
     }}>
-      {/* Main container */}
+      {/* Clock Device */}
       <div style={{
-        background: '#FFFFFF',
-        borderRadius: 24,
-        padding: '32px 40px 40px',
+        background: '#2a2a2a',
+        borderRadius: 32,
+        padding: '40px 48px 48px',
         position: 'relative',
-        border: '1px solid #E8E8E8',
+        boxShadow: `
+          0 20px 40px rgba(0,0,0,0.5),
+          0 10px 20px rgba(0,0,0,0.3),
+          inset 0 1px 0 rgba(255,255,255,0.05)
+        `,
       }}>
-        {/* Top accent bar */}
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          left: 40,
-          right: 40,
-          height: 4,
-          background: currentColor,
-          borderRadius: '0 0 2px 2px',
-        }} />
-
-        {/* Header row */}
+        {/* Speaker grille pattern at top */}
         <div style={{
           display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 6,
           marginBottom: 24,
         }}>
-          {/* Title with dot accent */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{
-              width: 8,
-              height: 8,
+          {[...Array(7)].map((_, i) => (
+            <div key={i} style={{
+              width: 4,
+              height: 4,
               borderRadius: '50%',
-              background: currentColor,
+              background: '#1a1a1a',
             }} />
-            <span style={{
-              fontSize: 11,
-              fontWeight: 700,
-              color: '#999',
-              letterSpacing: 2,
-              textTransform: 'uppercase',
-            }}>
-              Timer
-            </span>
-          </div>
+          ))}
+        </div>
 
-          {/* Settings button */}
-          <button
-            onClick={() => setShowSettings(!showSettings)}
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: 8,
-              background: showSettings ? currentColor : '#F5F5F0',
-              border: 'none',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'all 0.2s',
-            }}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={showSettings ? '#FFFFFF' : '#666'} strokeWidth="2">
-              <line x1="4" y1="6" x2="20" y2="6"/>
-              <line x1="4" y1="12" x2="20" y2="12"/>
-              <line x1="4" y1="18" x2="20" y2="18"/>
-              <circle cx="8" cy="6" r="2" fill={showSettings ? '#FFFFFF' : '#666'}/>
-              <circle cx="16" cy="12" r="2" fill={showSettings ? '#FFFFFF' : '#666'}/>
-              <circle cx="10" cy="18" r="2" fill={showSettings ? '#FFFFFF' : '#666'}/>
-            </svg>
-          </button>
+        {/* Brand label */}
+        <div style={{
+          textAlign: 'center',
+          marginBottom: 20,
+        }}>
+          <span style={{
+            fontSize: 10,
+            fontWeight: 600,
+            color: '#555',
+            letterSpacing: 4,
+            textTransform: 'uppercase',
+          }}>
+            Timer
+          </span>
         </div>
 
         {/* Student counter */}
@@ -402,35 +488,32 @@ export default function TimerPage() {
             justifyContent: 'center',
             gap: 16,
             marginBottom: 20,
-            padding: '8px 16px',
-            background: '#F5F5F0',
-            borderRadius: 20,
-            width: 'fit-content',
-            margin: '0 auto 20px',
           }}>
             <button
               onClick={prevStudent}
               disabled={currentStudent === 1}
               style={{
-                width: 24,
-                height: 24,
+                width: 28,
+                height: 28,
                 borderRadius: '50%',
-                background: currentStudent === 1 ? '#E0E0E0' : currentColor,
+                background: currentStudent === 1 ? '#3a3a3a' : currentColor,
                 border: 'none',
                 cursor: currentStudent === 1 ? 'not-allowed' : 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
+                opacity: currentStudent === 1 ? 0.5 : 1,
               }}
             >
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="3">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="3">
                 <polyline points="15 18 9 12 15 6"/>
               </svg>
             </button>
             <span style={{
-              fontSize: 12,
+              fontSize: 14,
               fontWeight: 600,
-              color: '#666',
+              color: '#888',
+              fontFamily: 'monospace',
             }}>
               {currentStudent} / {totalStudents}
             </span>
@@ -438,31 +521,38 @@ export default function TimerPage() {
               onClick={nextStudent}
               disabled={currentStudent === totalStudents}
               style={{
-                width: 24,
-                height: 24,
+                width: 28,
+                height: 28,
                 borderRadius: '50%',
-                background: currentStudent === totalStudents ? '#E0E0E0' : currentColor,
+                background: currentStudent === totalStudents ? '#3a3a3a' : currentColor,
                 border: 'none',
                 cursor: currentStudent === totalStudents ? 'not-allowed' : 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
+                opacity: currentStudent === totalStudents ? 0.5 : 1,
               }}
             >
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="3">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="3">
                 <polyline points="9 18 15 12 9 6"/>
               </svg>
             </button>
           </div>
         )}
 
-        {/* Clock display */}
-        <div style={{ marginBottom: 32 }}>
+        {/* Clock display with recessed look */}
+        <div style={{
+          background: '#1a1a1a',
+          borderRadius: 16,
+          padding: 20,
+          marginBottom: 32,
+          boxShadow: 'inset 0 4px 8px rgba(0,0,0,0.4)',
+        }}>
           <div style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: 8,
+            gap: 10,
           }}>
             <FlipDigit digit={minTens} color={currentColor} />
             <FlipDigit digit={minOnes} color={currentColor} />
@@ -471,20 +561,22 @@ export default function TimerPage() {
             <div style={{
               display: 'flex',
               flexDirection: 'column',
-              gap: 14,
-              padding: '0 4px',
+              gap: 20,
+              padding: '0 8px',
             }}>
               <div style={{
-                width: 10,
-                height: 10,
-                borderRadius: 2,
+                width: 12,
+                height: 12,
+                borderRadius: '50%',
                 background: currentColor,
+                boxShadow: `0 0 10px ${currentColor}50`,
               }} />
               <div style={{
-                width: 10,
-                height: 10,
-                borderRadius: 2,
+                width: 12,
+                height: 12,
+                borderRadius: '50%',
                 background: currentColor,
+                boxShadow: `0 0 10px ${currentColor}50`,
               }} />
             </div>
 
@@ -494,7 +586,7 @@ export default function TimerPage() {
 
           {/* Status indicator */}
           <div style={{
-            height: 24,
+            height: 28,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -504,14 +596,20 @@ export default function TimerPage() {
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: 6,
-                padding: '4px 12px',
-                background: '#FFF3E0',
-                borderRadius: 12,
+                gap: 8,
+                padding: '6px 14px',
+                background: 'rgba(244, 160, 36, 0.2)',
+                borderRadius: 14,
                 animation: 'pulse 1s infinite',
               }}>
-                <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#F4A024' }} />
-                <span style={{ fontSize: 10, fontWeight: 600, color: '#F4A024', letterSpacing: 1 }}>
+                <div style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: '50%',
+                  background: '#F4A024',
+                  boxShadow: '0 0 8px #F4A024',
+                }} />
+                <span style={{ fontSize: 11, fontWeight: 600, color: '#F4A024', letterSpacing: 1 }}>
                   FINISHING
                 </span>
               </div>
@@ -521,15 +619,15 @@ export default function TimerPage() {
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: 6,
-                padding: '4px 12px',
-                background: currentColor + '20',
-                borderRadius: 12,
+                gap: 8,
+                padding: '6px 14px',
+                background: `${currentColor}20`,
+                borderRadius: 14,
               }}>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={currentColor} strokeWidth="3">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={currentColor} strokeWidth="3">
                   <polyline points="20 6 9 17 4 12"/>
                 </svg>
-                <span style={{ fontSize: 10, fontWeight: 600, color: currentColor, letterSpacing: 1 }}>
+                <span style={{ fontSize: 11, fontWeight: 600, color: currentColor, letterSpacing: 1 }}>
                   COMPLETE
                 </span>
               </div>
@@ -537,96 +635,87 @@ export default function TimerPage() {
           </div>
         </div>
 
-        {/* Controls */}
+        {/* Control Knobs */}
         <div style={{
           display: 'flex',
           justifyContent: 'center',
-          gap: 12,
+          gap: 32,
         }}>
           {!isRunning ? (
-            <button
+            <Knob
               onClick={startTimer}
-              style={{
-                width: 64,
-                height: 64,
-                borderRadius: 16,
-                background: currentColor,
-                border: 'none',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                transition: 'transform 0.1s',
-              }}
-              onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.95)'}
-              onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
-              onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="#FFFFFF">
-                <polygon points="6 3 20 12 6 21 6 3"/>
-              </svg>
-            </button>
+              color={currentColor}
+              active={false}
+              label="Start"
+              icon={
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="#FFFFFF">
+                  <polygon points="7 4 19 12 7 20 7 4"/>
+                </svg>
+              }
+            />
           ) : (
-            <button
+            <Knob
               onClick={pauseTimer}
-              style={{
-                width: 64,
-                height: 64,
-                borderRadius: 16,
-                background: '#FFFFFF',
-                border: `3px solid ${currentColor}`,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                transition: 'transform 0.1s',
-              }}
-              onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.95)'}
-              onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
-              onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill={currentColor}>
-                <rect x="5" y="3" width="5" height="18" rx="1"/>
-                <rect x="14" y="3" width="5" height="18" rx="1"/>
-              </svg>
-            </button>
+              color={currentColor}
+              active={true}
+              label="Pause"
+              icon={
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="#FFFFFF">
+                  <rect x="6" y="4" width="4" height="16" rx="1"/>
+                  <rect x="14" y="4" width="4" height="16" rx="1"/>
+                </svg>
+              }
+            />
           )}
-          <button
+
+          <Knob
             onClick={resetTimer}
-            style={{
-              width: 64,
-              height: 64,
-              borderRadius: 16,
-              background: '#F5F5F0',
-              border: 'none',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'transform 0.1s',
-            }}
-            onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.95)'}
-            onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
-            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2.5">
-              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-              <path d="M3 3v5h5"/>
-            </svg>
-          </button>
+            color="#666"
+            active={false}
+            label="Reset"
+            icon={
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.5">
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                <path d="M3 3v5h5"/>
+              </svg>
+            }
+          />
+
+          <Knob
+            onClick={() => setShowSettings(!showSettings)}
+            color={currentColor}
+            active={showSettings}
+            label="Settings"
+            size={56}
+            icon={
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+              </svg>
+            }
+          />
         </div>
 
-        {/* Bottom decorative line */}
+        {/* Bottom rubber feet indicators */}
         <div style={{
-          position: 'absolute',
-          bottom: 12,
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: 40,
-          height: 4,
-          background: '#E8E8E8',
-          borderRadius: 2,
-        }} />
+          display: 'flex',
+          justifyContent: 'center',
+          gap: 200,
+          marginTop: 32,
+        }}>
+          <div style={{
+            width: 8,
+            height: 8,
+            borderRadius: '50%',
+            background: '#1a1a1a',
+          }} />
+          <div style={{
+            width: 8,
+            height: 8,
+            borderRadius: '50%',
+            background: '#1a1a1a',
+          }} />
+        </div>
       </div>
 
       {/* Settings panel */}
@@ -636,17 +725,17 @@ export default function TimerPage() {
           bottom: 0,
           left: 0,
           right: 0,
-          background: '#FFFFFF',
-          borderTop: '1px solid #E8E8E8',
-          padding: '20px 24px 24px',
+          background: '#2a2a2a',
+          borderTop: '1px solid #3a3a3a',
+          padding: '20px 24px 28px',
         }}>
-          <div style={{ maxWidth: 500, margin: '0 auto' }}>
+          <div style={{ maxWidth: 600, margin: '0 auto' }}>
             {/* Time Presets */}
             <div style={{ marginBottom: 20 }}>
               <label style={{
                 fontSize: 10,
                 fontWeight: 700,
-                color: '#999',
+                color: '#666',
                 display: 'block',
                 marginBottom: 10,
                 letterSpacing: 1,
@@ -654,27 +743,16 @@ export default function TimerPage() {
               }}>
                 Minutes
               </label>
-              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                 {presets.map(preset => (
-                  <button
+                  <SmallKnob
                     key={preset.seconds}
                     onClick={() => setPresetTime(preset.seconds)}
-                    style={{
-                      width: 44,
-                      height: 44,
-                      borderRadius: 10,
-                      background: totalTime === preset.seconds ? currentColor : '#F5F5F0',
-                      border: 'none',
-                      color: totalTime === preset.seconds ? '#FFFFFF' : '#666',
-                      fontSize: 13,
-                      fontWeight: 600,
-                      fontFamily: "Helvetica, Arial, sans-serif",
-                      cursor: 'pointer',
-                      transition: 'all 0.15s',
-                    }}
+                    active={totalTime === preset.seconds}
+                    color={currentColor}
                   >
                     {preset.label}
-                  </button>
+                  </SmallKnob>
                 ))}
               </div>
             </div>
@@ -684,7 +762,7 @@ export default function TimerPage() {
               <label style={{
                 fontSize: 10,
                 fontWeight: 700,
-                color: '#999',
+                color: '#666',
                 display: 'block',
                 marginBottom: 10,
                 letterSpacing: 1,
@@ -692,17 +770,17 @@ export default function TimerPage() {
               }}>
                 Palette
               </label>
-              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                 {(Object.keys(COLOR_PALETTES) as PaletteKey[]).map((key) => (
                   <button
                     key={key}
                     onClick={() => handlePaletteChange(key)}
                     style={{
-                      padding: '8px 14px',
-                      borderRadius: 10,
-                      background: selectedPalette === key ? currentColor : '#F5F5F0',
+                      padding: '10px 16px',
+                      borderRadius: 20,
+                      background: selectedPalette === key ? currentColor : '#3a3a3a',
                       border: 'none',
-                      color: selectedPalette === key ? '#FFFFFF' : '#666',
+                      color: '#FFFFFF',
                       fontSize: 11,
                       fontWeight: 600,
                       fontFamily: "Helvetica, Arial, sans-serif",
@@ -722,7 +800,7 @@ export default function TimerPage() {
               <label style={{
                 fontSize: 10,
                 fontWeight: 700,
-                color: '#999',
+                color: '#666',
                 display: 'block',
                 marginBottom: 10,
                 letterSpacing: 1,
@@ -730,20 +808,22 @@ export default function TimerPage() {
               }}>
                 Color
               </label>
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
                 {currentPalette.colors.map((option, index) => (
                   <button
                     key={option.name}
                     onClick={() => setSelectedColor(index)}
                     style={{
-                      width: 36,
-                      height: 36,
-                      borderRadius: 8,
+                      width: 40,
+                      height: 40,
+                      borderRadius: '50%',
                       background: option.color,
-                      border: selectedColor === index ? '3px solid #2D3047' : option.color === '#FFFFFF' || option.color === '#FFFF00' || option.color === '#FFFACD' ? '1px solid #DDD' : 'none',
+                      border: selectedColor === index ? '3px solid #FFFFFF' : option.color === '#FFFFFF' || option.color === '#FFFF00' || option.color === '#FFFACD' ? '2px solid #555' : '2px solid transparent',
                       cursor: 'pointer',
-                      transition: 'transform 0.1s',
-                      boxShadow: option.color === '#000000' && selectedColor === index ? 'inset 0 0 0 2px #FFF' : 'none',
+                      boxShadow: selectedColor === index
+                        ? `0 0 0 3px ${option.color}, 0 4px 8px rgba(0,0,0,0.3)`
+                        : '0 2px 4px rgba(0,0,0,0.2)',
+                      transition: 'all 0.15s',
                     }}
                     title={option.name}
                   />
@@ -756,7 +836,7 @@ export default function TimerPage() {
               <label style={{
                 fontSize: 10,
                 fontWeight: 700,
-                color: '#999',
+                color: '#666',
                 display: 'block',
                 marginBottom: 10,
                 letterSpacing: 1,
@@ -764,53 +844,36 @@ export default function TimerPage() {
               }}>
                 Students
               </label>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <button
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <SmallKnob
                   onClick={() => setTotalStudents(Math.max(1, totalStudents - 1))}
-                  style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: 8,
-                    background: '#F5F5F0',
-                    border: 'none',
-                    fontSize: 18,
-                    fontWeight: 600,
-                    color: '#666',
-                    cursor: 'pointer',
-                  }}
+                  active={false}
+                  color={currentColor}
                 >
                   −
-                </button>
+                </SmallKnob>
                 <span style={{
-                  fontSize: 20,
+                  fontSize: 24,
                   fontWeight: 600,
-                  color: '#2D3047',
-                  minWidth: 32,
+                  color: '#FFFFFF',
+                  minWidth: 40,
                   textAlign: 'center',
+                  fontFamily: 'monospace',
                 }}>
                   {totalStudents}
                 </span>
-                <button
+                <SmallKnob
                   onClick={() => setTotalStudents(totalStudents + 1)}
-                  style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: 8,
-                    background: '#F5F5F0',
-                    border: 'none',
-                    fontSize: 18,
-                    fontWeight: 600,
-                    color: '#666',
-                    cursor: 'pointer',
-                  }}
+                  active={false}
+                  color={currentColor}
                 >
                   +
-                </button>
+                </SmallKnob>
                 {totalStudents > 1 && (
                   <span style={{
-                    fontSize: 11,
-                    color: '#999',
-                    marginLeft: 8,
+                    fontSize: 12,
+                    color: '#666',
+                    marginLeft: 12,
                   }}>
                     {totalStudents * Math.ceil(totalTime / 60)} min total
                   </span>
