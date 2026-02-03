@@ -33,20 +33,12 @@ const COLORS = {
 // Avatar style types
 type AvatarStyle = 'block' | 'manga' | 'bird' | 'animal' | 'robot';
 
-// Avatar Editor Component - multiple styles for teachers
+// Avatar Editor Component - Photo upload with style filters
 function AvatarEditor({ onClose, onSave }: { onClose: () => void; onSave: (config: AvatarConfig) => void }) {
-  const [style, setStyle] = useState<AvatarStyle>('block');
-  const [hair, setHair] = useState('short');
-  const [accessory, setAccessory] = useState('none');
+  const [uploadedPhoto, setUploadedPhoto] = useState<string | null>(null);
+  const [selectedStyle, setSelectedStyle] = useState<'photo' | 'line' | 'manga'>('photo');
   const [color, setColor] = useState<'cyan' | 'magenta' | 'yellow' | 'key'>('cyan');
-
-  const styleOptions: AvatarStyle[] = ['block', 'manga', 'bird', 'animal', 'robot'];
-  const hairOptions = ['none', 'short', 'long', 'bangs', 'bob', 'curly', 'afro', 'punk', 'bun'];
-  const accessoryOptions = ['none', 'glasses', 'baseball', 'hat', 'earrings', 'headphones'];
-  const colorOptions: Array<'cyan' | 'magenta' | 'yellow' | 'key'> = ['cyan', 'magenta', 'yellow', 'key'];
-  const animalOptions = ['cat', 'dog', 'owl', 'fox', 'bear', 'bunny'];
-  const robotOptions = ['classic', 'android', 'retro', 'cute'];
-  const birdOptions = ['sparrow', 'parrot', 'penguin', 'flamingo', 'toucan', 'peacock'];
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const colorMap = {
     cyan: '#00D4FF',
@@ -55,19 +47,31 @@ function AvatarEditor({ onClose, onSave }: { onClose: () => void; onSave: (confi
     key: '#1a1f3c',
   };
 
-  // Render avatar preview based on style
-  const renderAvatarPreview = () => {
-    switch(style) {
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setUploadedPhoto(event.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // CSS filter styles for different effects
+  const getFilterStyle = () => {
+    switch (selectedStyle) {
+      case 'line':
+        return {
+          filter: 'grayscale(100%) contrast(200%) brightness(1.1)',
+          mixBlendMode: 'multiply' as const,
+        };
       case 'manga':
-        return <MangaAvatar color={colorMap[color]} size={100} />;
-      case 'bird':
-        return <BirdAvatar bird={hair} color={colorMap[color]} size={100} />;
-      case 'animal':
-        return <AnimalAvatar animal={hair} color={colorMap[color]} size={100} />;
-      case 'robot':
-        return <RobotAvatar variant={accessory} color={colorMap[color]} size={100} />;
+        return {
+          filter: 'contrast(150%) saturate(120%) brightness(1.05)',
+        };
       default:
-        return <BlockAvatarCustom hair={hair} accessory={accessory} size={100} />;
+        return {};
     }
   };
 
@@ -98,49 +102,57 @@ function AvatarEditor({ onClose, onSave }: { onClose: () => void; onSave: (confi
           Create Your Avatar
         </h3>
 
-        {/* Style Selection */}
-        <div style={{ marginBottom: 16 }}>
-          <label style={{ fontSize: 10, fontWeight: 600, color: '#888', display: 'block', marginBottom: 8, letterSpacing: 0.5, textTransform: 'uppercase' }}>Avatar Style</label>
-          <div style={{ display: 'flex', gap: 6 }}>
-            {styleOptions.map(s => (
-              <button
-                key={s}
-                onClick={() => setStyle(s)}
-                style={{
-                  flex: 1,
-                  padding: '8px 6px',
-                  background: style === s ? '#FAFAFA' : '#FFFFFF',
-                  border: style === s ? `1px solid ${colorMap[color]}` : '1px solid #E8E8E8',
-                  borderRadius: 8,
-                  fontSize: 9,
-                  cursor: 'pointer',
-                  textTransform: 'capitalize',
-                  color: style === s ? colorMap[color] : '#888',
-                  fontWeight: style === s ? 600 : 400,
-                  borderBottom: style === s ? `2px dotted ${colorMap[color]}` : undefined,
-                  transition: 'all 0.15s ease',
-                }}
-              >
-                {s}
-              </button>
-            ))}
-          </div>
-        </div>
+        {/* Hidden file input */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleFileUpload}
+          style={{ display: 'none' }}
+        />
 
-        {/* Preview */}
+        {/* Photo Upload / Preview Area */}
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
-          <div style={{
-            width: 120,
-            height: 120,
-            borderRadius: '50%',
-            background: '#FAFAFA',
-            border: `1px solid ${colorMap[color]}`,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            position: 'relative',
-          }}>
-            {renderAvatarPreview()}
+          <div
+            onClick={() => fileInputRef.current?.click()}
+            style={{
+              width: 140,
+              height: 140,
+              borderRadius: '50%',
+              background: '#FAFAFA',
+              border: `2px dashed ${colorMap[color]}`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              position: 'relative',
+              cursor: 'pointer',
+              overflow: 'hidden',
+              transition: 'all 0.2s',
+            }}
+          >
+            {uploadedPhoto ? (
+              <img
+                src={uploadedPhoto}
+                alt="Your avatar"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  ...getFilterStyle(),
+                }}
+              />
+            ) : (
+              <div style={{ textAlign: 'center', padding: 16 }}>
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke={colorMap[color]} strokeWidth="1.5" style={{ marginBottom: 8 }}>
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                  <circle cx="8.5" cy="8.5" r="1.5"/>
+                  <polyline points="21 15 16 10 5 21"/>
+                </svg>
+                <p style={{ fontSize: 10, color: '#888', margin: 0, lineHeight: 1.3 }}>
+                  Upload your<br/>school ID photo
+                </p>
+              </div>
+            )}
             {/* CMYK accent ring */}
             <div style={{
               position: 'absolute',
@@ -148,210 +160,160 @@ function AvatarEditor({ onClose, onSave }: { onClose: () => void; onSave: (confi
               borderRadius: '50%',
               border: `1px dashed ${colorMap[color]}`,
               opacity: 0.5,
+              pointerEvents: 'none',
             }} />
           </div>
         </div>
 
-        {/* Color Selection */}
-        <div style={{ marginBottom: 16 }}>
-          <label style={{ fontSize: 10, fontWeight: 600, color: '#888', display: 'block', marginBottom: 8, letterSpacing: 0.5, textTransform: 'uppercase' }}>Accent Color</label>
-          <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
-            {colorOptions.map(c => (
+        {/* Upload button if no photo yet */}
+        {!uploadedPhoto && (
+          <div style={{ textAlign: 'center', marginBottom: 20 }}>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              style={{
+                padding: '10px 24px',
+                background: '#FFFFFF',
+                border: `2px solid ${colorMap[color]}`,
+                borderRadius: 20,
+                color: colorMap[color],
+                fontSize: 12,
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'all 0.15s',
+              }}
+            >
+              Upload Photo
+            </button>
+          </div>
+        )}
+
+        {/* Style Selection - only show if photo is uploaded */}
+        {uploadedPhoto && (
+          <div style={{ marginBottom: 20 }}>
+            <label style={{ fontSize: 10, fontWeight: 600, color: '#888', display: 'block', marginBottom: 12, letterSpacing: 0.5, textTransform: 'uppercase', textAlign: 'center' }}>
+              Choose Your Style
+            </label>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+              {/* Photo style */}
               <button
-                key={c}
-                onClick={() => setColor(c)}
+                onClick={() => setSelectedStyle('photo')}
                 style={{
-                  width: 28,
-                  height: 28,
-                  borderRadius: '50%',
-                  background: '#FFFFFF',
-                  border: color === c ? `2px solid ${colorMap[c]}` : `1px solid ${colorMap[c]}`,
+                  width: 80,
+                  padding: '12px 8px',
+                  background: selectedStyle === 'photo' ? '#FAFAFA' : '#FFFFFF',
+                  border: selectedStyle === 'photo' ? `2px solid ${colorMap[color]}` : '1px solid #E8E8E8',
+                  borderRadius: 12,
                   cursor: 'pointer',
-                  position: 'relative',
                   transition: 'all 0.15s ease',
                 }}
               >
                 <div style={{
-                  position: 'absolute',
-                  inset: 4,
+                  width: 40,
+                  height: 40,
                   borderRadius: '50%',
-                  border: `2px solid ${colorMap[c]}`,
-                }} />
+                  margin: '0 auto 6px',
+                  overflow: 'hidden',
+                  border: '1px solid #E8E8E8',
+                }}>
+                  <img src={uploadedPhoto} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </div>
+                <span style={{ fontSize: 9, color: selectedStyle === 'photo' ? colorMap[color] : '#888', fontWeight: selectedStyle === 'photo' ? 600 : 400 }}>Photo</span>
               </button>
-            ))}
+
+              {/* Line Drawing style */}
+              <button
+                onClick={() => setSelectedStyle('line')}
+                style={{
+                  width: 80,
+                  padding: '12px 8px',
+                  background: selectedStyle === 'line' ? '#FAFAFA' : '#FFFFFF',
+                  border: selectedStyle === 'line' ? `2px solid ${colorMap[color]}` : '1px solid #E8E8E8',
+                  borderRadius: 12,
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                <div style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: '50%',
+                  margin: '0 auto 6px',
+                  overflow: 'hidden',
+                  border: '1px solid #E8E8E8',
+                  background: '#FFF',
+                }}>
+                  <img src={uploadedPhoto} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(100%) contrast(200%) brightness(1.1)' }} />
+                </div>
+                <span style={{ fontSize: 9, color: selectedStyle === 'line' ? colorMap[color] : '#888', fontWeight: selectedStyle === 'line' ? 600 : 400 }}>Line Art</span>
+              </button>
+
+              {/* Manga style */}
+              <button
+                onClick={() => setSelectedStyle('manga')}
+                style={{
+                  width: 80,
+                  padding: '12px 8px',
+                  background: selectedStyle === 'manga' ? '#FAFAFA' : '#FFFFFF',
+                  border: selectedStyle === 'manga' ? `2px solid ${colorMap[color]}` : '1px solid #E8E8E8',
+                  borderRadius: 12,
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                <div style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: '50%',
+                  margin: '0 auto 6px',
+                  overflow: 'hidden',
+                  border: '1px solid #E8E8E8',
+                }}>
+                  <img src={uploadedPhoto} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'contrast(150%) saturate(120%) brightness(1.05)' }} />
+                </div>
+                <span style={{ fontSize: 9, color: selectedStyle === 'manga' ? colorMap[color] : '#888', fontWeight: selectedStyle === 'manga' ? 600 : 400 }}>Manga</span>
+              </button>
+            </div>
           </div>
-        </div>
-
-        {/* Style-specific options */}
-        {style === 'block' && (
-          <>
-            {/* Hair Style */}
-            <div style={{ marginBottom: 12 }}>
-              <label style={{ fontSize: 10, fontWeight: 600, color: '#888', display: 'block', marginBottom: 8, letterSpacing: 0.5, textTransform: 'uppercase' }}>Hair Style</label>
-              <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                {hairOptions.map(h => (
-                  <button
-                    key={h}
-                    onClick={() => setHair(h)}
-                    style={{
-                      padding: '5px 10px',
-                      background: hair === h ? '#FAFAFA' : '#FFFFFF',
-                      border: hair === h ? `1px solid ${colorMap[color]}` : '1px solid #E8E8E8',
-                      borderRadius: 12,
-                      fontSize: 9,
-                      cursor: 'pointer',
-                      textTransform: 'capitalize',
-                      color: hair === h ? colorMap[color] : '#888',
-                      fontWeight: hair === h ? 500 : 400,
-                      transition: 'all 0.15s ease',
-                    }}
-                  >
-                    {h}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Accessory */}
-            <div style={{ marginBottom: 16 }}>
-              <label style={{ fontSize: 10, fontWeight: 600, color: '#888', display: 'block', marginBottom: 8, letterSpacing: 0.5, textTransform: 'uppercase' }}>Accessory</label>
-              <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                {accessoryOptions.map(a => (
-                  <button
-                    key={a}
-                    onClick={() => setAccessory(a)}
-                    style={{
-                      padding: '5px 10px',
-                      background: accessory === a ? '#FAFAFA' : '#FFFFFF',
-                      border: accessory === a ? `1px solid ${colorMap[color]}` : '1px solid #E8E8E8',
-                      borderRadius: 12,
-                      fontSize: 9,
-                      cursor: 'pointer',
-                      textTransform: 'capitalize',
-                      color: accessory === a ? colorMap[color] : '#888',
-                      fontWeight: accessory === a ? 500 : 400,
-                      transition: 'all 0.15s ease',
-                    }}
-                  >
-                    {a}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </>
         )}
 
-        {style === 'animal' && (
-          <div style={{ marginBottom: 16 }}>
-            <label style={{ fontSize: 10, fontWeight: 600, color: '#888', display: 'block', marginBottom: 8, letterSpacing: 0.5, textTransform: 'uppercase' }}>Animal Type</label>
-            <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-              {animalOptions.map(a => (
+        {/* Accent Color Selection */}
+        {uploadedPhoto && (
+          <div style={{ marginBottom: 20 }}>
+            <label style={{ fontSize: 10, fontWeight: 600, color: '#888', display: 'block', marginBottom: 10, letterSpacing: 0.5, textTransform: 'uppercase', textAlign: 'center' }}>
+              Accent Color
+            </label>
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+              {(['cyan', 'magenta', 'yellow', 'key'] as const).map(c => (
                 <button
-                  key={a}
-                  onClick={() => setHair(a)}
+                  key={c}
+                  onClick={() => setColor(c)}
                   style={{
-                    padding: '5px 10px',
-                    background: hair === a ? '#FAFAFA' : '#FFFFFF',
-                    border: hair === a ? `1px solid ${colorMap[color]}` : '1px solid #E8E8E8',
-                    borderRadius: 12,
-                    fontSize: 9,
+                    width: 32,
+                    height: 32,
+                    borderRadius: '50%',
+                    background: '#FFFFFF',
+                    border: color === c ? `3px solid ${colorMap[c]}` : `2px solid ${colorMap[c]}`,
                     cursor: 'pointer',
-                    textTransform: 'capitalize',
-                    color: hair === a ? colorMap[color] : '#888',
-                    fontWeight: hair === a ? 500 : 400,
+                    position: 'relative',
+                    transition: 'all 0.15s ease',
+                    boxShadow: color === c ? `0 0 8px ${colorMap[c]}40` : 'none',
                   }}
                 >
-                  {a}
+                  <div style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    width: 8,
+                    height: 8,
+                    borderRadius: '50%',
+                    background: color === c ? colorMap[c] : 'transparent',
+                  }} />
                 </button>
               ))}
             </div>
           </div>
         )}
-
-        {style === 'robot' && (
-          <div style={{ marginBottom: 16 }}>
-            <label style={{ fontSize: 10, fontWeight: 600, color: '#888', display: 'block', marginBottom: 8, letterSpacing: 0.5, textTransform: 'uppercase' }}>Robot Type</label>
-            <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-              {robotOptions.map(r => (
-                <button
-                  key={r}
-                  onClick={() => setAccessory(r)}
-                  style={{
-                    padding: '5px 10px',
-                    background: accessory === r ? '#FAFAFA' : '#FFFFFF',
-                    border: accessory === r ? `1px solid ${colorMap[color]}` : '1px solid #E8E8E8',
-                    borderRadius: 12,
-                    fontSize: 9,
-                    cursor: 'pointer',
-                    textTransform: 'capitalize',
-                    color: accessory === r ? colorMap[color] : '#888',
-                    fontWeight: accessory === r ? 500 : 400,
-                  }}
-                >
-                  {r}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {style === 'bird' && (
-          <div style={{ marginBottom: 16 }}>
-            <label style={{ fontSize: 10, fontWeight: 600, color: '#888', display: 'block', marginBottom: 8, letterSpacing: 0.5, textTransform: 'uppercase' }}>Bird Type</label>
-            <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-              {birdOptions.map(b => (
-                <button
-                  key={b}
-                  onClick={() => setHair(b)}
-                  style={{
-                    padding: '5px 10px',
-                    background: hair === b ? '#FAFAFA' : '#FFFFFF',
-                    border: hair === b ? `1px solid ${colorMap[color]}` : '1px solid #E8E8E8',
-                    borderRadius: 12,
-                    fontSize: 9,
-                    cursor: 'pointer',
-                    textTransform: 'capitalize',
-                    color: hair === b ? colorMap[color] : '#888',
-                    fontWeight: hair === b ? 500 : 400,
-                  }}
-                >
-                  {b}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Photo Upload Concept */}
-        <div style={{
-          marginBottom: 20,
-          padding: 12,
-          background: '#FAFAFA',
-          borderRadius: 12,
-          border: '1px dashed #D0D0D0',
-          textAlign: 'center',
-        }}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="1.5" style={{ marginBottom: 6 }}>
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-            <circle cx="8.5" cy="8.5" r="1.5"/>
-            <polyline points="21 15 16 10 5 21"/>
-          </svg>
-          <p style={{ fontSize: 10, color: '#888', margin: '0 0 8px', lineHeight: 1.4 }}>
-            Upload your photo and we'll create a cartoon version
-          </p>
-          <button style={{
-            padding: '6px 14px',
-            background: '#FFFFFF',
-            border: `1px solid ${colorMap[color]}`,
-            borderRadius: 16,
-            color: colorMap[color],
-            fontSize: 9,
-            fontWeight: 500,
-            cursor: 'pointer',
-          }}>
-            Upload Photo (Coming Soon)
-          </button>
-        </div>
 
         {/* Actions */}
         <div style={{ display: 'flex', gap: 8 }}>
@@ -359,29 +321,37 @@ function AvatarEditor({ onClose, onSave }: { onClose: () => void; onSave: (confi
             onClick={onClose}
             style={{
               flex: 1,
-              padding: '10px',
+              padding: '12px',
               background: '#FFFFFF',
               border: '1px solid #E8E8E8',
               borderRadius: 12,
               color: '#888',
-              fontSize: 11,
+              fontSize: 12,
               cursor: 'pointer',
             }}
           >
             Cancel
           </button>
           <button
-            onClick={() => onSave({ style, hair, accessory, color })}
+            onClick={() => onSave({
+              style: selectedStyle === 'manga' ? 'manga' : 'block',
+              hair: 'short',
+              accessory: 'none',
+              color,
+              photoUrl: uploadedPhoto || undefined,
+              photoStyle: selectedStyle,
+            })}
+            disabled={!uploadedPhoto}
             style={{
               flex: 1,
-              padding: '10px',
-              background: '#FFFFFF',
-              border: `1px solid ${colorMap[color]}`,
+              padding: '12px',
+              background: uploadedPhoto ? '#FFFFFF' : '#F5F5F5',
+              border: uploadedPhoto ? `2px solid ${colorMap[color]}` : '1px solid #E8E8E8',
               borderRadius: 12,
-              color: colorMap[color],
-              fontSize: 11,
+              color: uploadedPhoto ? colorMap[color] : '#CCC',
+              fontSize: 12,
               fontWeight: 600,
-              cursor: 'pointer',
+              cursor: uploadedPhoto ? 'pointer' : 'not-allowed',
             }}
           >
             Save Avatar
@@ -877,6 +847,8 @@ interface AvatarConfig {
   hair: string;
   accessory: string;
   color: string;
+  photoUrl?: string;
+  photoStyle?: 'photo' | 'line' | 'manga';
 }
 
 // Design teachers with block avatars, grade/subject
@@ -3174,7 +3146,24 @@ export default function HomePage() {
             }}
             title="Edit your Avatar"
           >
-            <BlockAvatarCustom hair={myAvatar.hair} accessory={myAvatar.accessory} size={32} />
+            {myAvatar.photoUrl ? (
+              <img
+                src={myAvatar.photoUrl}
+                alt="Your avatar"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  filter: myAvatar.photoStyle === 'line'
+                    ? 'grayscale(100%) contrast(200%) brightness(1.1)'
+                    : myAvatar.photoStyle === 'manga'
+                    ? 'contrast(150%) saturate(120%) brightness(1.05)'
+                    : 'none',
+                }}
+              />
+            ) : (
+              <BlockAvatarCustom hair={myAvatar.hair} accessory={myAvatar.accessory} size={32} />
+            )}
           </div>
         </div>
       </header>
