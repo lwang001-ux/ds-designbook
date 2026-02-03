@@ -3346,7 +3346,7 @@ export default function HomePage() {
                       File Generator
                     </a>
                     <a
-                      href="https://csf2030.work"
+                      href="https://csf2030.vercel.app"
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{
